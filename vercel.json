@@ -1,17 +1,19 @@
 {
-  "functions": {
-    "apis/index.py": {
-      "runtime": "@vercel/python"
-    }
-  },
-  "rewrites": [
+  "version": 2,
+  "builds": [
     {
-      "source": "/api/(.*)",
-      "destination": "/apis/index.py"
+      "src": "apis/index.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/api/(.*)",
+      "dest": "apis/index.py"
     },
     {
-      "source": "/(.*)",
-      "destination": "/index.html"
+      "src": "/(.*)",
+      "dest": "index.html"
     }
   ]
 }
