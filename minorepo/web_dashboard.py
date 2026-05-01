@@ -5,6 +5,11 @@ import time
 import json
 from datetime import datetime
 import kiem_tra_thuoc_logic as logic
+import psycopg2
+from dotenv import load_dotenv
+
+load_dotenv()
+DB_URL = os.getenv("SUPABASE_URL")
 
 app = Flask(__name__)
 
@@ -123,6 +128,43 @@ def get_stats():
             print(f"Debug: Lỗi xử lý CSV: {e}")
     else:
         print(f"Debug: Không tìm thấy file CSV tại {LOG_FILE}")
+
+    # 3. NẾU KHÔNG CÓ FILE LOCAL, LẤY TỪ SUPABASE (CHO VERCEL)
+    if not os.path.exists(LOG_FILE) and DB_URL:
+        try:
+            conn = psycopg2.connect(DB_URL)
+            cur = conn.cursor()
+            
+            # Lấy trạng thái hệ thống
+            cur.execute("SELECT plc_online, machine_running, cam_online, current_model_id, last_update FROM system_status WHERE id = 1")
+            row_st = cur.fetchone()
+            if row_st:
+                plc_connected, machine_running_db, cam_connected, current_model, last_update_db = row_st
+                status = "RUNNING" if machine_running_db else "STOPPED"
+                last_sync = last_update_db.strftime('%H:%M:%S')
+
+            # Lấy thống kê tổng quát
+            cur.execute("SELECT COUNT(*), COUNT(*) FILTER (WHERE is_ng = false), COUNT(*) FILTER (WHERE is_ng = true) FROM inspections")
+            total, ok, ng = cur.fetchone()
+
+            # Lấy loại lỗi
+            cur.execute("SELECT result FROM inspections WHERE is_ng = true")
+            rows_ng = cur.fetchall()
+            for r in rows_ng:
+                res_txt = r[0].lower()
+                if "di vat" in res_txt: error_types["Dị vật"] += 1
+                if "vo" in res_txt: error_types["Vỡ"] += 1
+                if "thieu" in res_txt: error_types["Thiếu viên"] += 1
+
+            # Lấy nhật ký gần nhất
+            cur.execute("SELECT id, product_name, result, created_at FROM inspections ORDER BY created_at DESC LIMIT 10")
+            rows_logs = cur.fetchall()
+            recent_logs = [[str(r[0]), r[1], r[2], r[3].strftime('%H:%M:%S')] for r in rows_logs]
+
+            cur.close()
+            conn.close()
+        except Exception as e:
+            print(f"Debug: Lỗi đọc Supabase: {e}")
 
     return jsonify({
         "total": total, "ok": ok, "ng": ng,
