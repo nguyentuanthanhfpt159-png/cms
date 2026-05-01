@@ -62,15 +62,15 @@ export default function LoginPage() {
 
             <Input
               label="Email công ty"
-              placeholder=" "
-              labelPlacement="inside"
+              placeholder="Nhập email của bạn..."
+              labelPlacement="outside"
               startContent={<Mail className="text-primary mr-2" size={20} />}
               variant="flat"
               size="lg"
               classNames={{
-                label: "text-default-400 font-bold",
+                label: "text-white font-black mb-4 block text-base", // Đưa chữ lên cao và đậm
                 input: "font-bold text-white ml-1",
-                inputWrapper: "bg-white/5 border-white/10 hover:bg-white/10 transition-background h-16",
+                inputWrapper: "bg-white/5 border border-white/10 hover:border-primary/50 transition-colors h-14",
               }}
               value={email}
               onValueChange={setEmail}
@@ -79,21 +79,22 @@ export default function LoginPage() {
 
             <Input
               label="Mật khẩu"
-              placeholder=" "
-              labelPlacement="inside"
+              placeholder="Nhập mật khẩu..."
+              labelPlacement="outside"
               type="password"
               startContent={<Lock className="text-primary mr-2" size={20} />}
               variant="flat"
               size="lg"
               classNames={{
-                label: "text-default-400 font-bold",
+                label: "text-white font-black mb-4 block text-base", // Đưa chữ lên cao và đậm
                 input: "font-bold text-white ml-1",
-                inputWrapper: "bg-white/5 border-white/10 hover:bg-white/10 transition-background h-16",
+                inputWrapper: "bg-white/5 border border-white/10 hover:border-primary/50 transition-colors h-14",
               }}
               value={password}
               onValueChange={setPassword}
               isRequired
             />
+
 
 
             <div className="flex justify-between items-center px-1">
