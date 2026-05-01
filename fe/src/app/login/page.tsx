@@ -62,12 +62,16 @@ export default function LoginPage() {
 
             <Input
               label="Email công ty"
-              placeholder="admin@pharma.com"
-              labelPlacement="outside"
-              startContent={<Mail className="text-default-400" size={18} />}
-              variant="bordered"
+              placeholder=" "
+              labelPlacement="inside"
+              startContent={<Mail className="text-primary mr-2" size={20} />}
+              variant="flat"
               size="lg"
-              className="font-bold"
+              classNames={{
+                label: "text-default-400 font-bold",
+                input: "font-bold text-white ml-1",
+                inputWrapper: "bg-white/5 border-white/10 hover:bg-white/10 transition-background h-16",
+              }}
               value={email}
               onValueChange={setEmail}
               isRequired
@@ -75,17 +79,22 @@ export default function LoginPage() {
 
             <Input
               label="Mật khẩu"
-              placeholder="••••••••"
-              labelPlacement="outside"
+              placeholder=" "
+              labelPlacement="inside"
               type="password"
-              startContent={<Lock className="text-default-400" size={18} />}
-              variant="bordered"
+              startContent={<Lock className="text-primary mr-2" size={20} />}
+              variant="flat"
               size="lg"
-              className="font-bold"
+              classNames={{
+                label: "text-default-400 font-bold",
+                input: "font-bold text-white ml-1",
+                inputWrapper: "bg-white/5 border-white/10 hover:bg-white/10 transition-background h-16",
+              }}
               value={password}
               onValueChange={setPassword}
               isRequired
             />
+
 
             <div className="flex justify-between items-center px-1">
               <Checkbox size="sm" classNames={{ label: "text-default-400 font-bold" }}>Ghi nhớ đăng nhập</Checkbox>
