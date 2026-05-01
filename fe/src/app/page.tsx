@@ -70,7 +70,8 @@ interface Stats {
   current_model: number;
   last_sync: string;
   error_types: Record<string, number>;
-  recent_logs: [string, string, string, string][];
+  recent_logs: [string, string, string, string, string | null][];
+
   hourly_data: number[];
   hourly_labels: string[];
 }
@@ -123,7 +124,8 @@ export default function StickyDashboard() {
         <NavbarContent justify="end">
           <div className="flex gap-4 mr-6">
             <ConnectionChip label="PLC" online={data.plc_connected} />
-            <ConnectionChip label="CAMEARA" online={data.cam_connected} />
+            <ConnectionChip label="CAMERA" online={data.cam_connected} />
+
           </div>
           <User
             name="Quản trị viên"
