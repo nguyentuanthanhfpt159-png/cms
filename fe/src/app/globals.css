@@ -1,34 +1,53 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+@source "../../node_modules/@nextui-org/theme/dist/**/*.{js,ts,jsx,tsx}";
 
-:root {
-  --background: #0b0f19;
-  --foreground: #e2e8f0;
+@theme {
+  /* NextUI Dark Theme Variables Bridge */
+  --color-background: #000000;
+  --color-foreground: #ffffff;
+  --color-primary: #0070f3;
+  --color-secondary: #7828c8;
+  --color-success: #17c964;
+  --color-warning: #f5a524;
+  --color-danger: #f31260;
+  
+  --radius-small: 8px;
+  --radius-medium: 12px;
+  --radius-large: 14px;
+}
+
+/* NextUI Styles */
+@layer base {
+  :root {
+    --nextui-background: 0 0% 100%;
+    --nextui-foreground: 240 10% 3.9%;
+    --nextui-primary: 212 100% 47%;
+  }
+
+  .dark {
+    --nextui-background: 240 10% 3.9%;
+    --nextui-foreground: 0 0% 98%;
+    --nextui-primary: 212 100% 47%;
+  }
 }
 
 body {
-  color: var(--foreground);
-  background: radial-gradient(circle at top right, #1e293b, #0f172a, var(--background));
-  min-height: 100vh;
+  @apply bg-background text-foreground min-h-screen antialiased;
 }
 
-.glass {
-  background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.glass-hover:hover {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: rgba(255, 255, 255, 0.2);
-}
-
-@keyframes pulse-subtle {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.7; }
-}
-
-.animate-pulse-subtle {
-  animation: pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+/* Custom Scrollbar for T4 */
+@utility custom-scrollbar {
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #475569;
+  }
 }

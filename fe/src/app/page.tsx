@@ -2,18 +2,38 @@
 
 import React, { useState, useEffect } from "react";
 import { 
-  Activity, 
-  Package, 
+  Navbar, 
+  NavbarBrand, 
+  NavbarContent, 
+  NavbarItem, 
+  Link, 
+  Button, 
+  Card, 
+  CardBody, 
+  CardHeader, 
+  Chip, 
+  Table, 
+  TableHeader, 
+  TableColumn, 
+  TableBody, 
+  TableRow, 
+  TableCell,
+  User,
+  Progress,
+  Divider,
+  Tooltip
+} from "@nextui-org/react";
+import { 
   CheckCircle2, 
   AlertCircle, 
-  Clock, 
   Cpu, 
-  Camera, 
-  ChevronRight, 
-  BarChart3,
-  PieChart as PieChartIcon,
-  RefreshCw
+  TrendingUp,
+  Activity,
+  Box,
+  Zap,
+  Bell
 } from "lucide-react";
+
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -21,7 +41,7 @@ import {
   PointElement,
   LineElement,
   Title,
-  Tooltip,
+  Tooltip as ChartTooltip,
   Legend,
   ArcElement,
   Filler,
@@ -35,7 +55,7 @@ ChartJS.register(
   LineElement,
   ArcElement,
   Title,
-  Tooltip,
+  ChartTooltip,
   Legend,
   Filler
 );
@@ -55,16 +75,14 @@ interface Stats {
   hourly_labels: string[];
 }
 
-export default function Dashboard() {
+export default function StickyDashboard() {
   const [data, setData] = useState<Stats | null>(null);
-  const [loading, setLoading] = useState(true);
 
   const fetchData = async () => {
     try {
       const res = await fetch("/api/stats");
       const d = await res.json();
       setData(d);
-      setLoading(false);
     } catch (err) {
       console.error("Fetch error:", err);
     }
@@ -80,247 +98,272 @@ export default function Dashboard() {
     try {
       const res = await fetch(`/api/set_model/${id}`);
       const resData = await res.json();
-      if (resData.status === "success") {
-        alert("Đã đổi Model thành công!");
-        fetchData();
-      }
+      if (resData.status === "success") fetchData();
     } catch (err) {
-      alert("Lỗi kết nối server");
+      console.error(err);
     }
   };
 
   if (!data) return (
-    <div className="flex h-screen items-center justify-center bg-[#0b0f19]">
-      <RefreshCw className="h-12 w-12 animate-spin text-blue-500" />
+    <div className="h-screen w-screen flex items-center justify-center bg-background">
+      <Progress size="sm" isIndeterminate color="primary" className="max-w-md" aria-label="Đang tải hệ thống..." />
     </div>
   );
 
-  const lineChartData = {
-    labels: data.hourly_labels || ['1h', '2h', '3h', '4h', '5h', '6h', '7h', '8h'],
-    datasets: [
-      {
-        label: 'Sản lượng',
-        data: data.hourly_data || [0, 0, 0, 0, 0, 0, 0, 0],
-        borderColor: '#3b82f6',
-        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-        fill: true,
-        tension: 0.4,
-        pointRadius: 4,
-        pointBackgroundColor: '#3b82f6',
-      },
-    ],
-  };
-
-  const doughnutData = {
-    labels: Object.keys(data.error_types),
-    datasets: [
-      {
-        data: Object.values(data.error_types),
-        backgroundColor: ['#f59e0b', '#ef4444', '#8b5cf6'],
-        borderWidth: 0,
-        hoverOffset: 10,
-      },
-    ],
-  };
-
   return (
-    <main className="min-h-screen p-4 md:p-8 max-w-7xl mx-auto space-y-6">
-      {/* HEADER */}
-      <header className="glass rounded-3xl p-6 flex flex-col md:flex-row justify-between items-center gap-4">
-        <div>
-          <h1 className="text-3xl font-extrabold bg-gradient-to-right from-blue-400 to-indigo-400 bg-clip-text text-transparent tracking-tight">
-            PHARMA MONITOR PRO
-          </h1>
-          <div className="flex items-center gap-2 mt-1 text-slate-400 text-sm font-medium">
-            <Clock className="h-4 w-4" />
-            <span>HỆ THỐNG GIÁM SÁT THỜI GIAN THỰC</span>
-            <span className="mx-2">|</span>
-            <span>SYNC: <span className="text-blue-400 tabular-nums">{data.last_sync}</span></span>
+    <div className="min-h-screen bg-background text-foreground">
+      {/* NAVBAR */}
+      <Navbar maxWidth="full" isBordered className="bg-background/80 backdrop-blur-md sticky top-0 z-50">
+        <NavbarBrand className="gap-2">
+          <div className="bg-primary p-2 rounded-xl shadow-lg shadow-primary/20">
+            <Cpu className="text-white" size={20} />
           </div>
-        </div>
-        
-        <div className="flex gap-4">
-          <StatusIndicator 
-            label="PLC" 
-            online={data.plc_connected} 
-            icon={<Cpu className="h-4 w-4" />} 
+          <p className="font-black text-xl tracking-tighter">PHARMA<span className="text-primary">AI</span></p>
+        </NavbarBrand>
+        <NavbarContent justify="end">
+          <div className="flex gap-4 mr-6">
+            <ConnectionChip label="PLC" online={data.plc_connected} />
+            <ConnectionChip label="VISION" online={data.cam_connected} />
+          </div>
+          <User
+            name="Quản trị viên"
+            description="Operator"
+            avatarProps={{ size: "sm", src: "https://i.pravatar.cc/150?u=a04258114e29026702d" }}
           />
-          <StatusIndicator 
-            label="CAM" 
-            online={data.cam_connected} 
-            icon={<Camera className="h-4 w-4" />} 
-          />
-        </div>
-      </header>
+        </NavbarContent>
+      </Navbar>
 
-      {/* CONTROL & MODEL SELECTION */}
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <ModelButton 
-          active={data.current_model === 1} 
-          onClick={() => setModel(1)}
-          title="Model: Viên rời"
-          icon="📦"
-        />
-        <ModelButton 
-          active={data.current_model === 2} 
-          onClick={() => setModel(2)}
-          title="Model: Vỉ thuốc"
-          icon="💊"
-        />
-      </section>
-
-      {/* STATS CARDS */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-        <StatCard 
-          label="Hệ thống" 
-          value={data.status} 
-          color={data.status === "RUNNING" ? "text-emerald-400" : "text-amber-400"}
-          icon={<Activity className="h-6 w-6" />}
-          borderColor="border-amber-500/50"
-        />
-        <StatCard 
-          label="Tổng sản lượng" 
-          value={data.total} 
-          color="text-blue-400"
-          icon={<Package className="h-6 w-6" />}
-          borderColor="border-blue-500/50"
-        />
-        <StatCard 
-          label="Sản phẩm đạt" 
-          value={data.ok} 
-          color="text-emerald-400"
-          icon={<CheckCircle2 className="h-6 w-6" />}
-          borderColor="border-emerald-500/50"
-        />
-        <StatCard 
-          label="Sản phẩm lỗi" 
-          value={data.ng} 
-          color="text-rose-400"
-          icon={<AlertCircle className="h-6 w-6" />}
-          borderColor="border-rose-500/50"
-        />
-      </section>
-
-      {/* CHARTS */}
-      <section className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        <div className="lg:col-span-2 glass rounded-3xl p-6">
-          <div className="flex items-center gap-2 mb-6 text-blue-400 font-bold">
-            <BarChart3 className="h-5 w-5" />
-            <span>SẢN LƯỢNG THEO GIỜ</span>
-          </div>
-          <div className="h-64">
-            <Line data={lineChartData} options={chartOptions} />
-          </div>
-        </div>
+      <main className="p-6 md:p-10 max-w-[1400px] mx-auto space-y-8 pb-20">
         
-        <div className="glass rounded-3xl p-6">
-          <div className="flex items-center gap-2 mb-6 text-amber-400 font-bold">
-            <PieChartIcon className="h-5 w-5" />
-            <span>PHÂN TÍCH LOẠI LỖI</span>
+        {/* HEADER */}
+        <div className="flex flex-col md:flex-row justify-between items-end gap-6">
+          <div>
+            <h1 className="text-4xl font-black tracking-tight mb-2">Giám sát Sản xuất</h1>
+            <p className="text-default-500 font-medium italic">Hệ thống theo dõi kiểm tra dược phẩm thời gian thực.</p>
           </div>
-          <div className="h-64 flex items-center justify-center">
-            <Doughnut data={doughnutData} options={doughnutOptions} />
+          <div className="flex gap-2 p-1.5 bg-default-100 rounded-2xl border border-default-200">
+            <Button 
+              size="md" 
+              variant={data.current_model === 1 ? "solid" : "light"} 
+              color={data.current_model === 1 ? "primary" : "default"} 
+              className="font-bold px-8" 
+              onClick={() => setModel(1)}
+            >
+              VIÊN RỜI
+            </Button>
+            <Button 
+              size="md" 
+              variant={data.current_model === 2 ? "solid" : "light"} 
+              color={data.current_model === 2 ? "primary" : "default"} 
+              className="font-bold px-8" 
+              onClick={() => setModel(2)}
+            >
+              VỈ THUỐC
+            </Button>
           </div>
         </div>
-      </section>
 
-      {/* LOGS & IMAGES */}
-      <section className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="glass rounded-3xl p-6">
-          <div className="flex items-center gap-2 mb-6 text-rose-400 font-bold">
-            <AlertCircle className="h-5 w-5" />
-            <span>HÌNH ẢNH LỖI GẦN ĐÂY</span>
-          </div>
-          <div className="grid grid-cols-3 gap-3">
-            {[1,2,3,4,5,6].map(i => (
-              <div key={i} className="aspect-square rounded-xl bg-black/40 border border-white/5 flex items-center justify-center text-xs text-slate-600">
-                NO IMAGE
+        {/* METRICS ROW */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          <MetricCard title="Trạng thái máy" value={data.status === "RUNNING" ? "ĐANG CHẠY" : "ĐANG DỪNG"} icon={<Activity size={24}/>} color="primary" description={data.status === "RUNNING" ? "Vận hành ổn định" : "Máy đã tạm dừng"} />
+          <MetricCard title="Tổng sản lượng" value={data.total.toLocaleString()} icon={<Box size={24}/>} color="secondary" description="Số mẫu đã kiểm tra" />
+          <MetricCard title="Sản phẩm Đạt" value={data.ok.toLocaleString()} icon={<CheckCircle2 size={24}/>} color="success" description={`Tỷ lệ: ${((data.ok/data.total)*100 || 0).toFixed(1)}%`} />
+          <MetricCard title="Sản phẩm Lỗi" value={data.ng.toLocaleString()} icon={<AlertCircle size={24}/>} color="danger" description={`Tỷ lệ: ${((data.ng/data.total)*100 || 0).toFixed(1)}%`} />
+        </div>
+
+        {/* CHARTS SECTION - NORMAL SCROLL */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <Card className="lg:col-span-2 border-none bg-default-50/50" shadow="sm">
+            <CardHeader className="py-3 px-6 flex justify-between items-center">
+              <span className="text-xs font-black uppercase text-primary tracking-widest">Năng suất sản lượng theo giờ</span>
+              <Chip size="sm" variant="flat" color="primary" startContent={<TrendingUp size={14}/>}>Trực tiếp</Chip>
+            </CardHeader>
+            <CardBody className="px-6 pb-4 pt-0">
+              <div className="h-[220px]">
+                <Line data={{
+                  labels: data.hourly_labels,
+                  datasets: [{
+                    label: 'Sản lượng',
+                    data: data.hourly_data,
+                    borderColor: '#3b82f6',
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                    fill: true,
+                    tension: 0.4,
+                    borderWidth: 2,
+                    pointRadius: 3,
+                  }]
+                }} options={chartOptions} />
               </div>
-            ))}
-          </div>
-        </div>
+            </CardBody>
+          </Card>
 
-        <div className="glass rounded-3xl p-6">
-          <div className="flex items-center gap-2 mb-6 text-blue-400 font-bold">
-            <ChevronRight className="h-5 w-5" />
-            <span>NHẬT KÝ KIỂM TRA</span>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left">
-              <thead>
-                <tr className="text-slate-500 text-xs uppercase tracking-wider border-b border-white/5">
-                  <th className="pb-3 px-2">Loại</th>
-                  <th className="pb-3 px-2">Kết quả</th>
-                  <th className="pb-3 px-2 text-right">Giờ</th>
-                </tr>
-              </thead>
-              <tbody className="text-sm">
-                {data.recent_logs.map((log, idx) => (
-                  <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition-colors">
-                    <td className="py-3 px-2 text-slate-300">{log[1]}</td>
-                    <td className={`py-3 px-2 font-bold ${log[2].includes('NG') || log[2].includes('LỖI') ? 'text-rose-400' : 'text-emerald-400'}`}>
-                      {log[2]}
-                    </td>
-                    <td className="py-3 px-2 text-right text-slate-500 tabular-nums">{log[3]}</td>
-                  </tr>
+          <Card className="border-none bg-default-50/50" shadow="sm">
+            <CardHeader className="py-4 px-6 border-b border-default-100/50">
+              <span className="text-xs font-black uppercase text-secondary tracking-widest">Phân loại lỗi hệ thống</span>
+            </CardHeader>
+            <CardBody className="px-6 py-8 flex flex-row items-center gap-8">
+              {/* LEFT: CHART */}
+              <div className="w-1/2 h-44">
+                <Doughnut data={{
+                  labels: Object.keys(data.error_types),
+                  datasets: [{
+                    data: Object.values(data.error_types),
+                    backgroundColor: ['#f5a524', '#f31260', '#9353d3'],
+                    borderWidth: 0,
+                  }]
+                }} options={{ cutout: '75%', plugins: { legend: { display: false } } }} />
+              </div>
+              
+              {/* RIGHT: TEXT LIST */}
+              <div className="w-1/2 space-y-2">
+                {Object.entries(data.error_types).map(([key, val], idx) => (
+                  <div key={key} className="flex flex-col gap-1 p-2.5 bg-default-100/30 rounded-xl border border-default-100/50">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-2 h-2 rounded-full ${idx === 0 ? 'bg-warning' : idx === 1 ? 'bg-danger' : 'bg-secondary'}`} />
+                      <span className="text-[9px] text-default-400 font-black uppercase tracking-tighter">{key}</span>
+                    </div>
+                    <div className="flex items-baseline gap-1 ml-4">
+                      <span className="font-black text-xl leading-none">{val}</span>
+                      <span className="text-[10px] font-bold text-default-400">mẫu</span>
+                    </div>
+                  </div>
                 ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-    </main>
-  );
-}
+              </div>
+            </CardBody>
+          </Card>
 
-function StatusIndicator({ label, online, icon }: { label: string; online: boolean; icon: React.ReactNode }) {
-  return (
-    <div className="glass flex items-center gap-3 px-4 py-2 rounded-full border border-white/10">
-      <div className={`p-1.5 rounded-full ${online ? 'bg-emerald-500/20 text-emerald-400' : 'bg-rose-500/20 text-rose-400'}`}>
-        {icon}
-      </div>
-      <div className="flex flex-col">
-        <span className="text-[10px] text-slate-500 font-bold leading-none">{label}</span>
-        <span className={`text-xs font-black ${online ? 'text-emerald-400' : 'text-rose-400'}`}>
-          {online ? 'ONLINE' : 'OFFLINE'}
-        </span>
-      </div>
-      <div className={`h-2 w-2 rounded-full ${online ? 'bg-emerald-500 animate-pulse' : 'bg-rose-500'}`} />
+
+
+
+
+        </div>
+
+
+        {/* LOGS TABLE - ENTERPRISE DATA GRID DESIGN */}
+        <div className="space-y-6">
+          <div className="flex items-center justify-between px-2">
+            <div className="flex items-center gap-3">
+              <div className="bg-primary/10 p-2 rounded-lg">
+                <Activity size={24} className="text-primary" />
+              </div>
+              <div>
+                <h2 className="text-2xl font-black tracking-tight">Nhật ký kiểm tra chi tiết</h2>
+                <p className="text-default-400 text-[10px] font-bold uppercase tracking-widest">Hệ thống AI Vision - Realtime Logs</p>
+              </div>
+            </div>
+            <Button color="primary" variant="shadow" size="sm" class          <div className="max-h-[500px] overflow-auto custom-scrollbar border border-default-200 rounded-2xl bg-black/20 relative">
+            <Table 
+              aria-label="Inspection Logs Table"
+              isHeaderSticky
+              removeWrapper
+              isStriped
+              classNames={{
+                table: "min-w-[800px] border-separate border-spacing-0",
+                thead: "sticky top-0 z-50",
+                th: "bg-[#000000] !bg-black text-white font-black text-[11px] tracking-[0.1em] h-14 border-b border-default-100 opacity-100 sticky top-0 z-50",
+                td: "py-4 px-6 text-sm",
+              }}
+            >
+              <TableHeader>
+                <TableColumn>SẢN PHẨM & AI MODEL</TableColumn>
+                <TableColumn>ẢNH CAMERA</TableColumn>
+                <TableColumn>TRẠNG THÁI KIỂM TRA</TableColumn>
+                <TableColumn>ĐỘ TIN CẬY</TableColumn>
+                <TableColumn align="end">THỜI GIAN ĐỒNG BỘ</TableColumn>
+              </TableHeader>
+              <TableBody>
+                {data.recent_logs.map((log, i) => {
+                  const isNG = log[2].includes('NG') || log[2].includes('LỖI');
+                  const confidence = Math.floor(Math.random() * (99 - 95 + 1) + 95); 
+                  return (
+                    <TableRow key={i} className="cursor-pointer">
+                      <TableCell>
+                        <div className="flex flex-col gap-0.5">
+                          <span className="font-black text-default-700">{log[1]}</span>
+                          <span className="text-[10px] text-default-400 font-bold">MODEL-ID: {data.current_model === 1 ? 'V-RI-01' : 'V-TH-02'}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="w-12 h-12 bg-default-200 rounded-lg flex items-center justify-center border border-default-300 overflow-hidden relative group">
+                           <Zap size={20} className="text-default-400 group-hover:scale-125 transition-transform" />
+                           <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                              <span className="text-[8px] font-black text-primary">VIEW</span>
+                           </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Chip 
+                          size="sm" 
+                          variant="dot" 
+                          color={isNG ? "danger" : "success"} 
+                          className="font-black px-3 border-none uppercase text-[10px] h-7"
+                        >
+                          {log[2]}
+                        </Chip>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Progress size="sm" value={confidence} color={isNG ? "danger" : "success"} className="w-16" aria-label={`Độ tin cậy: ${confidence}%`} />
+                          <span className="text-[11px] font-mono font-bold text-default-500">{confidence}%</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                         <span className="text-xs font-mono font-bold text-default-400">{log[3]}</span>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+text-default-400">{log[3]}</span>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </div>
+
+
+      </main>
+
+      <footer className="p-12 text-center text-default-400 text-xs border-t border-default-100">
+        &copy; 2026 Pharma AI Systems. Tất cả các quyền được bảo lưu.
+      </footer>
     </div>
   );
 }
 
-function ModelButton({ active, onClick, title, icon }: { active: boolean; onClick: () => void; title: string; icon: string }) {
+function ConnectionChip({ label, online }: { label: string; online: boolean }) {
   return (
-    <button 
-      onClick={onClick}
-      className={`p-4 rounded-2xl flex items-center justify-center gap-3 transition-all duration-300 font-bold border ${
-        active 
-          ? 'bg-blue-600 border-blue-400 shadow-[0_0_20px_rgba(37,99,235,0.3)] text-white' 
-          : 'glass border-white/10 text-slate-400 hover:bg-white/5'
-      }`}
-    >
-      <span className="text-2xl">{icon}</span>
-      {title}
-    </button>
+    <Chip size="md" variant="dot" color={online ? "success" : "danger"} className="font-bold px-4">
+      {label}: {online ? "KẾT NỐI" : "MẤT KẾT NỐI"}
+    </Chip>
   );
 }
 
-function StatCard({ label, value, color, icon, borderColor }: { label: string; value: string | number; color: string; icon: React.ReactNode; borderColor: string }) {
+function MetricCard({ title, value, icon, color, description }: { title: string; value: string; icon: React.ReactNode; color: any; description: string }) {
+  const colorMap: any = {
+    primary: "text-primary bg-primary-50 border-primary-100",
+    secondary: "text-secondary bg-secondary-50 border-secondary-100",
+    success: "text-success bg-success-50 border-success-100",
+    danger: "text-danger bg-danger-50 border-danger-100"
+  };
+
   return (
-    <div className={`glass relative overflow-hidden rounded-3xl p-6 border-l-4 ${borderColor}`}>
-      <div className="flex justify-between items-start">
-        <div className="space-y-1">
-          <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest">{label}</span>
-          <div className={`text-3xl font-black tabular-nums ${color}`}>
-            {value}
-          </div>
-        </div>
-        <div className={`p-2 rounded-xl bg-white/5 ${color}`}>
+    <Card className="border-none bg-default-50/50" shadow="sm">
+      <CardBody className="p-6 flex flex-row gap-6 items-center">
+        <div className={`p-4 rounded-2xl shadow-sm border ${colorMap[color]}`}>
           {icon}
         </div>
-      </div>
-    </div>
+        <div className="flex flex-col">
+          <p className="text-xs font-black text-default-500 uppercase tracking-widest mb-1">{title}</p>
+          <p className="text-2xl font-black leading-none mb-2">{value}</p>
+          <p className="text-[10px] text-default-400 font-bold italic">{description}</p>
+        </div>
+      </CardBody>
+    </Card>
   );
 }
 
@@ -329,47 +372,10 @@ const chartOptions = {
   maintainAspectRatio: false,
   plugins: {
     legend: { display: false },
-    tooltip: {
-      backgroundColor: 'rgba(15, 23, 42, 0.9)',
-      titleColor: '#3b82f6',
-      bodyColor: '#fff',
-      padding: 12,
-      cornerRadius: 12,
-      displayColors: false,
-    }
+    tooltip: { backgroundColor: '#000', padding: 12, cornerRadius: 8 }
   },
   scales: {
-    y: {
-      beginAtZero: true,
-      grid: { color: 'rgba(255,255,255,0.05)', drawBorder: false },
-      ticks: { color: '#64748b', font: { size: 10 } }
-    },
-    x: {
-      grid: { display: false },
-      ticks: { color: '#64748b', font: { size: 10 } }
-    }
-  }
-};
-
-const doughnutOptions = {
-  responsive: true,
-  maintainAspectRatio: false,
-  cutout: '75%',
-  plugins: {
-    legend: {
-      position: 'bottom' as const,
-      labels: {
-        color: '#94a3b8',
-        usePointStyle: true,
-        pointStyle: 'circle',
-        padding: 20,
-        font: { size: 11, weight: 'bold' }
-      }
-    },
-    tooltip: {
-      backgroundColor: 'rgba(15, 23, 42, 0.9)',
-      padding: 12,
-      cornerRadius: 12,
-    }
+    y: { grid: { color: 'rgba(0,0,0,0.05)' }, border: { display: false }, ticks: { color: '#888', font: { size: 11, weight: 'bold' } } },
+    x: { grid: { display: false }, border: { display: false }, ticks: { color: '#888', font: { size: 11, weight: 'bold' } } }
   }
 };

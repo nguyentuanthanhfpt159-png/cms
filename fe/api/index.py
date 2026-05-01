@@ -47,6 +47,26 @@ def get_stats():
         rows_logs = cur.fetchall()
         recent_logs = [[str(r[0]), r[1], r[2], r[3].strftime('%H:%M:%S')] for r in rows_logs]
 
+        # 5. Thống kê theo giờ (8 giờ gần nhất)
+        cur.execute("""
+            SELECT 
+                to_char(hour, 'HH24') || 'h' as label,
+                COUNT(i.id) as count
+            FROM (
+                SELECT generate_series(
+                    date_trunc('hour', NOW()) - interval '7 hours',
+                    date_trunc('hour', NOW()),
+                    interval '1 hour'
+                ) as hour
+            ) h
+            LEFT JOIN inspections i ON date_trunc('hour', i.created_at) = h.hour
+            GROUP BY h.hour
+            ORDER BY h.hour
+        """)
+        hourly_rows = cur.fetchall()
+        hourly_labels = [r[0] for r in hourly_rows]
+        hourly_data = [r[1] for r in hourly_rows]
+
         cur.close()
         conn.close()
 
@@ -59,11 +79,13 @@ def get_stats():
             "last_sync": last_update,
             "recent_logs": recent_logs,
             "error_types": error_types,
-            "hourly_data": [0]*8,
-            "hourly_labels": ['1h','2h','3h','4h','5h','6h','7h','8h']
+            "hourly_data": hourly_data,
+            "hourly_labels": hourly_labels
         })
 
     except Exception as e:
+        if 'conn' in locals() and conn:
+            conn.close()
         return jsonify({"status": "error", "message": str(e)})
 
 @app.route('/api/set_model/<int:model_id>')
@@ -87,3 +109,4 @@ def get_images():
 
 if __name__ == "__main__":
     app.run(debug=True)
+
