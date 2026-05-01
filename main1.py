@@ -11,6 +11,12 @@ import threading
 import requests
 import json
 import snap7
+import psycopg2
+from dotenv import load_dotenv
+
+# Load biến môi trường từ file .env
+load_dotenv()
+DB_URL = os.getenv("SUPABASE_URL")
 
 # --- IMPORT FILE LOGIC ĐÃ CẬP NHẬT 4 CLASS ---
 import kiem_tra_thuoc_logic as logic 
@@ -314,7 +320,50 @@ class App:
                 }, f)
             if os.path.exists(status_path): os.remove(status_path)
             os.rename(temp_path, status_path)
+            
+            # ĐẨY TRẠNG THÁI LÊN SUPABASE
+            self.push_status_to_supabase(plc_status, machine_status)
         except: pass
+
+    def push_status_to_supabase(self, plc_online, machine_running):
+        if not DB_URL or "MAT_KHAU" in DB_URL: return
+        def run():
+            try:
+                conn = psycopg2.connect(DB_URL)
+                cur = conn.cursor()
+                cur.execute("""
+                    INSERT INTO system_status (id, plc_online, machine_running, cam_online, current_model_id, last_update)
+                    VALUES (1, %s, %s, %s, %s, NOW())
+                    ON CONFLICT (id) DO UPDATE SET 
+                        plc_online = EXCLUDED.plc_online,
+                        machine_running = EXCLUDED.machine_running,
+                        cam_online = EXCLUDED.cam_online,
+                        current_model_id = EXCLUDED.current_model_id,
+                        last_update = EXCLUDED.last_update;
+                """, (plc_online, machine_running, getattr(self, 'cam_connected', False), 1 if self.current_product == "Viên rời" else 2))
+                conn.commit()
+                cur.close()
+                conn.close()
+            except Exception as e:
+                print(f"Lỗi đẩy trạng thái lên Supabase: {e}")
+        threading.Thread(target=run, daemon=True).start()
+
+    def push_inspection_to_supabase(self, product, result, is_ng, details):
+        if not DB_URL or "MAT_KHAU" in DB_URL: return
+        def run():
+            try:
+                conn = psycopg2.connect(DB_URL)
+                cur = conn.cursor()
+                cur.execute("""
+                    INSERT INTO inspections (product_name, result, is_ng, details)
+                    VALUES (%s, %s, %s, %s);
+                """, (product, result, is_ng, " | ".join(details)))
+                conn.commit()
+                cur.close()
+                conn.close()
+            except Exception as e:
+                print(f"Lỗi đẩy kết quả lên Supabase: {e}")
+        threading.Thread(target=run, daemon=True).start()
 
     def setup_ui(self):
         self.frame_left = tk.Frame(self.root, bg=COLOR_BG)
@@ -399,6 +448,9 @@ class App:
                         self.vien_ng if self.current_product == "Viên rời" else self.vi_ng)
                 except: pass
             
+            # ĐẨY KẾT QUẢ LÊN SUPABASE
+            self.push_inspection_to_supabase(self.current_product, conclusion, is_ng, details)
+
             self.root.after(0, lambda: self.finish_check_ui(annotated, info, conclusion, is_ng, details, timestamp))
         except Exception as e:
             print(f"Lỗi xử lý: {e}")
