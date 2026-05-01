@@ -24,10 +24,15 @@ export default function LoginPage() {
         password,
       });
 
-      if (authError) throw authError;
+      if (authError) {
+        setError(authError.message === "Invalid login credentials" 
+          ? "Sai email hoặc mật khẩu. Vui lòng kiểm tra lại!" 
+          : authError.message);
+        throw authError;
+      }
       
-      // Chuyển hướng về Dashboard sau khi đăng nhập thành công
       router.push("/");
+
       router.refresh();
     } catch (err: any) {
       setError(err.message || "Lỗi đăng nhập. Vui lòng kiểm tra lại tài khoản.");

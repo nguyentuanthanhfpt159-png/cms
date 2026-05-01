@@ -31,8 +31,10 @@ import {
   Activity,
   Box,
   Zap,
-  Bell
+  Bell,
+  Lock
 } from "lucide-react";
+
 
 import {
   Chart as ChartJS,
@@ -84,17 +86,24 @@ export default function StickyDashboard() {
   const [data, setData] = useState<Stats | null>(null);
   const [user, setUser] = useState<any>(null);
   const [role, setRole] = useState<string>("user");
+  const [isCheckingAuth, setIsCheckingAuth] = useState(true);
   const router = useRouter();
 
   const checkUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push("/login");
+      } else {
+        setUser(user);
+        setRole(user.user_metadata?.role || "user");
+        setIsCheckingAuth(false); // Chỉ tắt loading khi đã xác nhận đăng nhập
+      }
+    } catch (err) {
       router.push("/login");
-    } else {
-      setUser(user);
-      setRole(user.user_metadata?.role || "user");
     }
   };
+
 
   const handleLogout = async () => {
     await supabase.auth.signOut();
@@ -142,11 +151,22 @@ export default function StickyDashboard() {
 
 
 
+  if (isCheckingAuth) return (
+    <div className="h-screen w-screen flex flex-col items-center justify-center bg-[#050505]">
+      <div className="bg-primary/10 p-6 rounded-full animate-pulse mb-6">
+        <Lock className="text-primary" size={40} />
+      </div>
+      <Progress size="sm" isIndeterminate color="primary" className="max-w-[200px]" aria-label="Đang kiểm tra bảo mật..." />
+      <p className="text-default-400 text-xs font-bold mt-4 tracking-widest uppercase">Đang kiểm tra bảo mật...</p>
+    </div>
+  );
+
   if (!data) return (
     <div className="h-screen w-screen flex items-center justify-center bg-background">
       <Progress size="sm" isIndeterminate color="primary" className="max-w-md" aria-label="Đang tải hệ thống..." />
     </div>
   );
+
 
   // Kiểm tra nếu API trả về lỗi
   if ((data as any).status === "error") return (
