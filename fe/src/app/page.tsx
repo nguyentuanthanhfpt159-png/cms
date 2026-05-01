@@ -60,6 +60,10 @@ ChartJS.register(
   Filler
 );
 
+import { supabase } from "@/lib/supabase";
+import { useRouter } from "next/navigation";
+
+
 interface Stats {
   total: number;
   ok: number;
@@ -78,6 +82,25 @@ interface Stats {
 
 export default function StickyDashboard() {
   const [data, setData] = useState<Stats | null>(null);
+  const [user, setUser] = useState<any>(null);
+  const [role, setRole] = useState<string>("user");
+  const router = useRouter();
+
+  const checkUser = async () => {
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) {
+      router.push("/login");
+    } else {
+      setUser(user);
+      setRole(user.user_metadata?.role || "user");
+    }
+  };
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+  };
+
 
   const fetchData = async () => {
     try {
@@ -90,12 +113,18 @@ export default function StickyDashboard() {
   };
 
   useEffect(() => {
+    checkUser();
     fetchData();
     const interval = setInterval(fetchData, 2000);
     return () => clearInterval(interval);
   }, []);
 
+
   const setModel = async (id: number) => {
+    if (role !== "admin") {
+      alert("⚠️ Bạn không có quyền truy cập chức năng này!");
+      return;
+    }
     try {
       const res = await fetch(`/api/set_model/${id}`);
       const resData = await res.json();
@@ -104,6 +133,7 @@ export default function StickyDashboard() {
       console.error(err);
     }
   };
+
 
   const handleExport = () => {
     // Gọi trực tiếp đến API Backend để tải file CSV chứa toàn bộ dữ liệu
@@ -147,12 +177,18 @@ export default function StickyDashboard() {
             <ConnectionChip label="CAM" online={data.cam_connected} />
           </div>
           <div className="hidden sm:block">
-            <User
-              name="Quản trị viên"
-              description="Operator"
-              avatarProps={{ size: "sm", src: "https://i.pravatar.cc/150?u=a04258114e29026702d" }}
-            />
+            <div className="flex items-center gap-4">
+              <User
+                name={user?.email?.split('@')[0].toUpperCase() || "Người dùng"}
+                description={role === "admin" ? "Administrator" : "Operator"}
+                avatarProps={{ size: "sm", src: "https://i.pravatar.cc/150?u=a04258114e29026702d" }}
+              />
+              <Button size="sm" color="danger" variant="flat" onPress={handleLogout} className="font-bold">
+                THOÁT
+              </Button>
+            </div>
           </div>
+
         </NavbarContent>
       </Navbar>
 
