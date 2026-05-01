@@ -83,11 +83,7 @@ def set_model(model_id):
 
 @app.route('/api/images')
 def get_images():
-    return jsonify([]) # Vercel cannot serve local images
+    return jsonify([])
 
-# Vercel needs this 'app' object
-app = app
-
-# Some environments prefer a 'handler' function
-def handler(environ, start_response):
-    return app(environ, start_response)
+if __name__ == "__main__":
+    app.run(debug=True)
