@@ -105,6 +105,13 @@ export default function StickyDashboard() {
     }
   };
 
+  const handleExport = () => {
+    // Gọi trực tiếp đến API Backend để tải file CSV chứa toàn bộ dữ liệu
+    window.location.href = "/api/export";
+  };
+
+
+
   if (!data) return (
     <div className="h-screen w-screen flex items-center justify-center bg-background">
       <Progress size="sm" isIndeterminate color="primary" className="max-w-md" aria-label="Đang tải hệ thống..." />
@@ -261,9 +268,17 @@ export default function StickyDashboard() {
                 <p className="text-default-400 text-[10px] font-bold uppercase tracking-widest">Hệ thống AI Vision - Realtime Logs</p>
               </div>
             </div>
-            <Button color="primary" variant="shadow" size="sm" className="font-bold px-6 h-9" startContent={<TrendingUp size={16} />}>
+            <Button 
+              color="primary" 
+              variant="shadow" 
+              size="sm" 
+              className="font-bold px-6 h-9" 
+              startContent={<TrendingUp size={16} />}
+              onPress={handleExport}
+            >
               XUẤT BÁO CÁO
             </Button>
+
           </div>
 
           <div className="max-h-[500px] overflow-auto custom-scrollbar border border-default-200 rounded-2xl bg-black/20 relative">

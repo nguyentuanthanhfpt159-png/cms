@@ -1,15 +1,56 @@
-from flask import Flask, jsonify
+from flask import Flask, jsonify, make_response
 import os
 import psycopg2
 from dotenv import load_dotenv
 from datetime import datetime
+import io
+import csv
 
 load_dotenv()
 DB_URL = os.getenv("SUPABASE_URL")
 
 app = Flask(__name__)
 
+@app.route('/api/export')
+def export_all():
+    if not DB_URL:
+        return "Chưa cấu hình Database", 500
+
+    try:
+        conn = psycopg2.connect(DB_URL)
+        cur = conn.cursor()
+        
+        # Lấy toàn bộ dữ liệu nhật ký
+        cur.execute("SELECT id, product_name, result, created_at FROM inspections ORDER BY created_at DESC")
+        rows = cur.fetchall()
+        
+        # Tạo file CSV trong bộ nhớ
+        si = io.StringIO()
+        si.write('\ufeff') # Thêm BOM để hiển thị đúng tiếng Việt trong Excel
+        cw = csv.writer(si)
+        cw.writerow(['ID', 'Sản phẩm', 'Kết quả', 'Thời gian'])
+        
+        for r in rows:
+            cw.writerow([
+                str(r[0]), 
+                r[1], 
+                r[2], 
+                r[3].strftime('%d/%m/%Y %H:%M') if r[3] else ""
+            ])
+        
+        output = make_response(si.getvalue())
+        output.headers["Content-Disposition"] = f"attachment; filename=Bao_cao_PharmaAI_Full_{datetime.now().strftime('%Y%m%d')}.csv"
+        output.headers["Content-type"] = "text/csv; charset=utf-8"
+        
+        cur.close()
+        conn.close()
+        return output
+
+    except Exception as e:
+        return str(e), 500
+
 @app.route('/api/stats')
+
 def get_stats():
     if not DB_URL:
         return jsonify({"status": "error", "message": "Chưa cấu hình SUPABASE_URL"})
