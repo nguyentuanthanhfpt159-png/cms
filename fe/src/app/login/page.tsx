@@ -52,7 +52,7 @@ export default function LoginPage() {
             <p className="text-default-400 font-medium text-sm">Hệ thống quản lý sản xuất thông minh</p>
           </div>
 
-          <form onSubmit={handleLogin} className="flex flex-col gap-4">
+          <form onSubmit={handleLogin} className="flex flex-col gap-6">
             {error && (
               <div className="bg-danger-50 border border-danger-200 p-3 rounded-xl flex items-center gap-3 text-danger text-sm">
                 <AlertCircle size={18} />
@@ -60,40 +60,43 @@ export default function LoginPage() {
               </div>
             )}
 
-            <Input
-              label="Email công ty"
-              placeholder="Nhập email của bạn..."
-              labelPlacement="outside"
-              startContent={<Mail className="text-primary mr-2" size={20} />}
-              variant="flat"
-              size="lg"
-              classNames={{
-                label: "text-white font-black mb-4 block text-base", // Đưa chữ lên cao và đậm
-                input: "font-bold text-white ml-1",
-                inputWrapper: "bg-white/5 border border-white/10 hover:border-primary/50 transition-colors h-14",
-              }}
-              value={email}
-              onValueChange={setEmail}
-              isRequired
-            />
+            {/* Field: Email */}
+            <div className="flex flex-col gap-2">
+              <label className="text-white font-black text-xs uppercase tracking-[0.2em] ml-1 opacity-80">Email công ty</label>
+              <Input
+                placeholder="Nhập email của bạn..."
+                startContent={<Mail className="text-primary mr-2" size={20} />}
+                variant="flat"
+                size="lg"
+                classNames={{
+                  input: "font-bold text-white ml-1",
+                  inputWrapper: "bg-white/5 border border-white/10 hover:border-primary/50 transition-colors h-14",
+                }}
+                value={email}
+                onValueChange={setEmail}
+                isRequired
+              />
+            </div>
 
-            <Input
-              label="Mật khẩu"
-              placeholder="Nhập mật khẩu..."
-              labelPlacement="outside"
-              type="password"
-              startContent={<Lock className="text-primary mr-2" size={20} />}
-              variant="flat"
-              size="lg"
-              classNames={{
-                label: "text-white font-black mb-4 block text-base", // Đưa chữ lên cao và đậm
-                input: "font-bold text-white ml-1",
-                inputWrapper: "bg-white/5 border border-white/10 hover:border-primary/50 transition-colors h-14",
-              }}
-              value={password}
-              onValueChange={setPassword}
-              isRequired
-            />
+            {/* Field: Password */}
+            <div className="flex flex-col gap-2">
+              <label className="text-white font-black text-xs uppercase tracking-[0.2em] ml-1 opacity-80">Mật khẩu</label>
+              <Input
+                placeholder="Nhập mật khẩu..."
+                type="password"
+                startContent={<Lock className="text-primary mr-2" size={20} />}
+                variant="flat"
+                size="lg"
+                classNames={{
+                  input: "font-bold text-white ml-1",
+                  inputWrapper: "bg-white/5 border border-white/10 hover:border-primary/50 transition-colors h-14",
+                }}
+                value={password}
+                onValueChange={setPassword}
+                isRequired
+              />
+            </div>
+
 
 
 
