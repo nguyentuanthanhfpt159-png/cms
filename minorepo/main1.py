@@ -17,6 +17,8 @@ from dotenv import load_dotenv
 # Load biến môi trường từ file .env
 load_dotenv()
 DB_URL = os.getenv("SUPABASE_URL")
+SUPABASE_API_URL = os.getenv("SUPABASE_API_URL")
+SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 # --- IMPORT FILE LOGIC ĐÃ CẬP NHẬT 4 CLASS ---
 import kiem_tra_thuoc_logic as logic 
@@ -38,15 +40,17 @@ CAPTURE_DELAY_VIEN = 0.0   # Viên rời: chụp NGAY khi cảm biến kích (kh
 CAPTURE_DELAY_VI   = 1.2      # Vỉ thuốc: chờ 0.3s để vỉ vào đúng tâm ảnh (chỉnh theo thực tế)
 PLC_SIGNAL_DURATION = 0.8  # (Giây) Thời gian giữ tín hiệu kết quả trên PLC
 
-# Thư mục lưu trữ
-BASE_DIR = r"D:\Code\captured_medicine"
-NG_DIR = os.path.join(BASE_DIR, "NG_LOI")
-OK_DIR = os.path.join(BASE_DIR, "OK_DAT")
+# Thư mục lưu trữ chuyên nghiệp
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+HISTORY_DIR = os.path.join(BASE_DIR, "captured_history")
+NG_DIR = os.path.join(HISTORY_DIR, "NG")
+OK_DIR = os.path.join(HISTORY_DIR, "OK")
 
 os.makedirs(NG_DIR, exist_ok=True)
 os.makedirs(OK_DIR, exist_ok=True)
 
-EXCEL_FILENAME = os.path.join(BASE_DIR, "Lich_su_phan_loai.csv")
+EXCEL_FILENAME = os.path.join(HISTORY_DIR, "Lich_su_phan_loai.csv")
+
 
 # ==============================
 # MÀU GIAO DIỆN
@@ -348,16 +352,38 @@ class App:
                 print(f"Lỗi đẩy trạng thái lên Supabase: {e}")
         threading.Thread(target=run, daemon=True).start()
 
-    def push_inspection_to_supabase(self, product, result, is_ng, details):
+    def upload_to_supabase_storage(self, file_path, file_name):
+        """Tải ảnh lên Supabase Storage và trả về Public URL"""
+        if not SUPABASE_API_URL or not SUPABASE_KEY or "YOUR" in SUPABASE_KEY:
+            return None
+            
+        url = f"{SUPABASE_API_URL}/storage/v1/object/inspection-images/{file_name}"
+        headers = {
+            "Authorization": f"Bearer {SUPABASE_KEY}",
+            "Content-Type": "image/jpeg"
+        }
+        try:
+            with open(file_path, "rb") as f:
+                res = requests.post(url, headers=headers, data=f)
+                if res.status_code == 200:
+                    # Trả về link public (Đảm bảo Bucket 'inspection-images' đã được chỉnh Public)
+                    return f"{SUPABASE_API_URL}/storage/v1/object/public/inspection-images/{file_name}"
+                else:
+                    print(f"Lỗi Upload Storage: {res.status_code} - {res.text}")
+        except Exception as e:
+            print(f"Lỗi Upload: {e}")
+        return None
+
+    def push_inspection_to_supabase(self, product, result, is_ng, details, image_url=None):
         if not DB_URL or "MAT_KHAU" in DB_URL: return
         def run():
             try:
                 conn = psycopg2.connect(DB_URL)
                 cur = conn.cursor()
                 cur.execute("""
-                    INSERT INTO inspections (product_name, result, is_ng, details)
-                    VALUES (%s, %s, %s, %s);
-                """, (product, result, is_ng, " | ".join(details)))
+                    INSERT INTO inspections (product_name, result, is_ng, details, image_url)
+                    VALUES (%s, %s, %s, %s, %s);
+                """, (product, result, is_ng, " | ".join(details), image_url))
                 conn.commit()
                 cur.close()
                 conn.close()
@@ -448,8 +474,8 @@ class App:
                         self.vien_ng if self.current_product == "Viên rời" else self.vi_ng)
                 except: pass
             
-            # ĐẨY KẾT QUẢ LÊN SUPABASE
-            self.push_inspection_to_supabase(self.current_product, conclusion, is_ng, details)
+            # ĐẨY KẾT QUẢ LÊN SUPABASE (Sẽ đẩy sau khi có ảnh ở finish_check_ui)
+            # self.push_inspection_to_supabase(self.current_product, conclusion, is_ng, details)
 
             self.root.after(0, lambda: self.finish_check_ui(annotated, info, conclusion, is_ng, details, timestamp))
         except Exception as e:
@@ -471,7 +497,19 @@ class App:
             img_res = ImageTk.PhotoImage(Image.fromarray(cv2.cvtColor(img_res, cv2.COLOR_BGR2RGB)))
             self.lbl_result_image.config(image=img_res)
             self.lbl_result_image.imgtk = img_res
-            cv2.imwrite(os.path.join(NG_DIR if is_ng else OK_DIR, f"pill_{timestamp}.jpg"), annotated)
+            
+            # --- LƯU ẢNH CỤC BỘ VÀ UPLOAD SUPABASE ---
+            file_name = f"pill_{timestamp}.jpg"
+            local_path = os.path.join(NG_DIR if is_ng else OK_DIR, file_name)
+            cv2.imwrite(local_path, annotated)
+            
+            # Upload lên Storage (Chạy ngầm để không đơ UI)
+            def upload_task():
+                img_url = self.upload_to_supabase_storage(local_path, file_name)
+                # Sau khi có URL, mới đẩy data lên Database
+                self.push_inspection_to_supabase(self.current_product, conclusion, is_ng, details, img_url)
+            
+            threading.Thread(target=upload_task, daemon=True).start()
         
         self.save_to_csv(timestamp, conclusion, is_ng, details)
         

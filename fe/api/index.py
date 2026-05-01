@@ -25,7 +25,8 @@ def get_stats():
         plc_connected, machine_running, cam_online, current_model, last_update = False, False, False, 1, "--:--:--"
         if row_st:
             plc_connected, machine_running_db, cam_online, current_model, last_update_dt = row_st
-            last_update = last_update_dt.strftime('%H:%M:%S')
+            last_update = last_update_dt.strftime('%d/%m/%Y %H:%M')
+
             machine_running = machine_running_db
 
         # 2. Thống kê sản lượng
@@ -43,9 +44,11 @@ def get_stats():
             elif "thieu" in res_txt: error_types["Thiếu viên"] += 1
 
         # 4. Nhật ký gần nhất
-        cur.execute("SELECT id, product_name, result, created_at FROM inspections ORDER BY created_at DESC LIMIT 10")
+        cur.execute("SELECT id, product_name, result, created_at, image_url FROM inspections ORDER BY created_at DESC LIMIT 10")
         rows_logs = cur.fetchall()
-        recent_logs = [[str(r[0]), r[1], r[2], r[3].strftime('%H:%M:%S')] for r in rows_logs]
+        recent_logs = [[str(r[0]), r[1], r[2], r[3].strftime('%d/%m/%Y %H:%M'), r[4]] for r in rows_logs]
+
+
 
         # 5. Thống kê theo giờ (8 giờ gần nhất)
         cur.execute("""

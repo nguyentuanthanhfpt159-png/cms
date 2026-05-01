@@ -1,32 +1,32 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { 
-  Navbar, 
-  NavbarBrand, 
-  NavbarContent, 
-  NavbarItem, 
-  Link, 
-  Button, 
-  Card, 
-  CardBody, 
-  CardHeader, 
-  Chip, 
-  Table, 
-  TableHeader, 
-  TableColumn, 
-  TableBody, 
-  TableRow, 
+import {
+  Navbar,
+  NavbarBrand,
+  NavbarContent,
+  NavbarItem,
+  Link,
+  Button,
+  Card,
+  CardBody,
+  CardHeader,
+  Chip,
+  Table,
+  TableHeader,
+  TableColumn,
+  TableBody,
+  TableRow,
   TableCell,
   User,
   Progress,
   Divider,
   Tooltip
 } from "@nextui-org/react";
-import { 
-  CheckCircle2, 
-  AlertCircle, 
-  Cpu, 
+import {
+  CheckCircle2,
+  AlertCircle,
+  Cpu,
   TrendingUp,
   Activity,
   Box,
@@ -123,7 +123,7 @@ export default function StickyDashboard() {
         <NavbarContent justify="end">
           <div className="flex gap-4 mr-6">
             <ConnectionChip label="PLC" online={data.plc_connected} />
-            <ConnectionChip label="VISION" online={data.cam_connected} />
+            <ConnectionChip label="CAMEARA" online={data.cam_connected} />
           </div>
           <User
             name="Quản trị viên"
@@ -134,7 +134,7 @@ export default function StickyDashboard() {
       </Navbar>
 
       <main className="p-6 md:p-10 max-w-[1400px] mx-auto space-y-8 pb-20">
-        
+
         {/* HEADER */}
         <div className="flex flex-col md:flex-row justify-between items-end gap-6">
           <div>
@@ -142,21 +142,21 @@ export default function StickyDashboard() {
             <p className="text-default-500 font-medium italic">Hệ thống theo dõi kiểm tra dược phẩm thời gian thực.</p>
           </div>
           <div className="flex gap-2 p-1.5 bg-default-100 rounded-2xl border border-default-200">
-            <Button 
-              size="md" 
-              variant={data.current_model === 1 ? "solid" : "light"} 
-              color={data.current_model === 1 ? "primary" : "default"} 
-              className="font-bold px-8" 
-              onClick={() => setModel(1)}
+            <Button
+              size="md"
+              variant={data.current_model === 1 ? "solid" : "light"}
+              color={data.current_model === 1 ? "primary" : "default"}
+              className="font-bold px-8"
+              onPress={() => setModel(1)}
             >
               VIÊN RỜI
             </Button>
-            <Button 
-              size="md" 
-              variant={data.current_model === 2 ? "solid" : "light"} 
-              color={data.current_model === 2 ? "primary" : "default"} 
-              className="font-bold px-8" 
-              onClick={() => setModel(2)}
+            <Button
+              size="md"
+              variant={data.current_model === 2 ? "solid" : "light"}
+              color={data.current_model === 2 ? "primary" : "default"}
+              className="font-bold px-8"
+              onPress={() => setModel(2)}
             >
               VỈ THUỐC
             </Button>
@@ -165,10 +165,10 @@ export default function StickyDashboard() {
 
         {/* METRICS ROW */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <MetricCard title="Trạng thái máy" value={data.status === "RUNNING" ? "ĐANG CHẠY" : "ĐANG DỪNG"} icon={<Activity size={24}/>} color="primary" description={data.status === "RUNNING" ? "Vận hành ổn định" : "Máy đã tạm dừng"} />
-          <MetricCard title="Tổng sản lượng" value={data.total.toLocaleString()} icon={<Box size={24}/>} color="secondary" description="Số mẫu đã kiểm tra" />
-          <MetricCard title="Sản phẩm Đạt" value={data.ok.toLocaleString()} icon={<CheckCircle2 size={24}/>} color="success" description={`Tỷ lệ: ${((data.ok/data.total)*100 || 0).toFixed(1)}%`} />
-          <MetricCard title="Sản phẩm Lỗi" value={data.ng.toLocaleString()} icon={<AlertCircle size={24}/>} color="danger" description={`Tỷ lệ: ${((data.ng/data.total)*100 || 0).toFixed(1)}%`} />
+          <MetricCard title="Trạng thái máy" value={data.status === "RUNNING" ? "ĐANG CHẠY" : "ĐANG DỪNG"} icon={<Activity size={24} />} color="primary" description={data.status === "RUNNING" ? "Vận hành ổn định" : "Máy đã tạm dừng"} />
+          <MetricCard title="Tổng sản lượng" value={data.total.toLocaleString()} icon={<Box size={24} />} color="secondary" description="Số mẫu đã kiểm tra" />
+          <MetricCard title="Sản phẩm Đạt" value={data.ok.toLocaleString()} icon={<CheckCircle2 size={24} />} color="success" description={`Tỷ lệ: ${((data.ok / data.total) * 100 || 0).toFixed(1)}%`} />
+          <MetricCard title="Sản phẩm Lỗi" value={data.ng.toLocaleString()} icon={<AlertCircle size={24} />} color="danger" description={`Tỷ lệ: ${((data.ng / data.total) * 100 || 0).toFixed(1)}%`} />
         </div>
 
         {/* CHARTS SECTION - NORMAL SCROLL */}
@@ -176,7 +176,7 @@ export default function StickyDashboard() {
           <Card className="lg:col-span-2 border-none bg-default-50/50" shadow="sm">
             <CardHeader className="py-3 px-6 flex justify-between items-center">
               <span className="text-xs font-black uppercase text-primary tracking-widest">Năng suất sản lượng theo giờ</span>
-              <Chip size="sm" variant="flat" color="primary" startContent={<TrendingUp size={14}/>}>Trực tiếp</Chip>
+              <Chip size="sm" variant="flat" color="primary" startContent={<TrendingUp size={14} />}>Trực tiếp</Chip>
             </CardHeader>
             <CardBody className="px-6 pb-4 pt-0">
               <div className="h-[220px]">
@@ -213,7 +213,7 @@ export default function StickyDashboard() {
                   }]
                 }} options={{ cutout: '75%', plugins: { legend: { display: false } } }} />
               </div>
-              
+
               {/* RIGHT: TEXT LIST */}
               <div className="w-1/2 space-y-2">
                 {Object.entries(data.error_types).map(([key, val], idx) => (
@@ -231,13 +231,7 @@ export default function StickyDashboard() {
               </div>
             </CardBody>
           </Card>
-
-
-
-
-
         </div>
-
 
         {/* LOGS TABLE - ENTERPRISE DATA GRID DESIGN */}
         <div className="space-y-6">
@@ -251,8 +245,13 @@ export default function StickyDashboard() {
                 <p className="text-default-400 text-[10px] font-bold uppercase tracking-widest">Hệ thống AI Vision - Realtime Logs</p>
               </div>
             </div>
-            <Button color="primary" variant="shadow" size="sm" class          <div className="max-h-[500px] overflow-auto custom-scrollbar border border-default-200 rounded-2xl bg-black/20 relative">
-            <Table 
+            <Button color="primary" variant="shadow" size="sm" className="font-bold px-6 h-9" startContent={<TrendingUp size={16} />}>
+              XUẤT BÁO CÁO
+            </Button>
+          </div>
+
+          <div className="max-h-[500px] overflow-auto custom-scrollbar border border-default-200 rounded-2xl bg-black/20 relative">
+            <Table
               aria-label="Inspection Logs Table"
               isHeaderSticky
               removeWrapper
@@ -274,7 +273,7 @@ export default function StickyDashboard() {
               <TableBody>
                 {data.recent_logs.map((log, i) => {
                   const isNG = log[2].includes('NG') || log[2].includes('LỖI');
-                  const confidence = Math.floor(Math.random() * (99 - 95 + 1) + 95); 
+                  const confidence = Math.floor(Math.random() * (99 - 95 + 1) + 95);
                   return (
                     <TableRow key={i} className="cursor-pointer">
                       <TableCell>
@@ -284,18 +283,31 @@ export default function StickyDashboard() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="w-12 h-12 bg-default-200 rounded-lg flex items-center justify-center border border-default-300 overflow-hidden relative group">
-                           <Zap size={20} className="text-default-400 group-hover:scale-125 transition-transform" />
-                           <div className="absolute inset-0 bg-primary/10 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                              <span className="text-[8px] font-black text-primary">VIEW</span>
-                           </div>
+                        <div className="w-16 h-12 bg-default-100 rounded-lg flex items-center justify-center border border-default-200 overflow-hidden relative group cursor-zoom-in shadow-sm">
+                          <img
+                            src={log[4] || (log[1].toUpperCase().includes('VIÊN')
+                              ? "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200&q=80"
+                              : "https://images.unsplash.com/photo-1550572017-ed2002061266?w=200&q=80")
+                            }
+                            alt="Inspection"
+                            className="w-full h-full object-cover group-hover:scale-150 transition-transform duration-500"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = "https://placehold.co/200x160/18181b/ffffff?text=NO+IMAGE";
+                            }}
+                          />
+                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <span className="text-[10px] font-black text-white uppercase">XEM</span>
+                          </div>
                         </div>
                       </TableCell>
+
+
+
                       <TableCell>
-                        <Chip 
-                          size="sm" 
-                          variant="dot" 
-                          color={isNG ? "danger" : "success"} 
+                        <Chip
+                          size="sm"
+                          variant="dot"
+                          color={isNG ? "danger" : "success"}
                           className="font-black px-3 border-none uppercase text-[10px] h-7"
                         >
                           {log[2]}
@@ -308,7 +320,7 @@ export default function StickyDashboard() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                         <span className="text-xs font-mono font-bold text-default-400">{log[3]}</span>
+                        <span className="text-xs font-mono font-bold text-default-400">{log[3]}</span>
                       </TableCell>
                     </TableRow>
                   );
@@ -316,16 +328,7 @@ export default function StickyDashboard() {
               </TableBody>
             </Table>
           </div>
-text-default-400">{log[3]}</span>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
         </div>
-
-
       </main>
 
       <footer className="p-12 text-center text-default-400 text-xs border-t border-default-100">
