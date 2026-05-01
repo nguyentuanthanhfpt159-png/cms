@@ -1,19 +1,18 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "minorepo/app.py",
-      "use": "@vercel/python"
+  "functions": {
+    "minorepo/app.py": {
+      "runtime": "@vercel/python"
     }
-  ],
-  "routes": [
+  },
+  "rewrites": [
     {
-      "src": "/api/(.*)",
-      "dest": "minorepo/app.py"
+      "source": "/api/(.*)",
+      "destination": "/minorepo/app.py"
     },
     {
-      "src": "/(.*)",
-      "dest": "minorepo/index.html"
+      "source": "/(.*)",
+      "destination": "/minorepo/index.html"
     }
   ]
 }
