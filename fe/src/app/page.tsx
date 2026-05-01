@@ -96,13 +96,19 @@ export default function StickyDashboard() {
         router.push("/login");
       } else {
         setUser(user);
-        setRole(user.user_metadata?.role || "user");
-        setIsCheckingAuth(false); // Chỉ tắt loading khi đã xác nhận đăng nhập
+        // Ưu tiên đọc từ Metadata, nếu không có thì kiểm tra xem Email có chứa chữ "admin" không
+        const userRole = user.user_metadata?.role || (user.email?.toLowerCase().includes("admin") ? "admin" : "user");
+        console.log("Current User Role:", userRole); 
+        setRole(userRole);
+        setIsCheckingAuth(false);
       }
+
     } catch (err) {
+      console.error("Auth check error:", err);
       router.push("/login");
     }
   };
+
 
 
   const handleLogout = async () => {
