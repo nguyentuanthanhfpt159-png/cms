@@ -378,7 +378,8 @@ const chartOptions = {
     tooltip: { backgroundColor: '#000', padding: 12, cornerRadius: 8 }
   },
   scales: {
-    y: { grid: { color: 'rgba(0,0,0,0.05)' }, border: { display: false }, ticks: { color: '#888', font: { size: 11, weight: 'bold' } } },
-    x: { grid: { display: false }, border: { display: false }, ticks: { color: '#888', font: { size: 11, weight: 'bold' } } }
+    y: { grid: { color: 'rgba(0,0,0,0.05)' }, border: { display: false }, ticks: { color: '#888', font: { size: 11, weight: 'bold' as const } } },
+    x: { grid: { display: false }, border: { display: false }, ticks: { color: '#888', font: { size: 11, weight: 'bold' as const } } }
   }
 };
+
