@@ -1,0 +1,180 @@
+STT,Sản phẩm,Kết quả,Thời gian
+1,Viên rời,"[NG] NG (1 LỖI) - OK: 1, Lỗi: 1 (vo)",2026-04-27 23:45:10
+2,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-27 23:45:24
+1,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (di_vat)",2026-04-28 12:28:27
+2,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-28 12:28:47
+1,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-28 12:31:27
+2,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-28 12:31:44
+3,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-28 12:31:57
+4,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-28 12:32:17
+5,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-28 12:32:32
+6,Viên rời,"[NG] NG (2 LỖI) - OK: 0, Lỗi: 2 (vo)",2026-04-28 12:32:51
+7,Viên rời,"[NG] NG (2 LỖI) - OK: 0, Lỗi: 2 (di vat, vo)",2026-04-28 12:33:10
+8,Viên rời,"[NG] NG (1 LỖI) - OK: 1, Lỗi: 1 (vo)",2026-04-28 12:33:43
+1,Vỉ thuốc,[OK] CHỜ VẬT THỂ,2026-04-28 12:38:35
+2,Vỉ thuốc,[OK] CHỜ VẬT THỂ,2026-04-28 12:38:39
+1,Viên rời,"[NG] NG (1 LỖI) - OK: 6, Lỗi: 1 (di vat)",2026-04-28 12:39:26
+2,Viên rời,"[NG] NG (1 LỖI) - OK: 1, Lỗi: 1 (di vat)",2026-04-28 12:39:29
+1,Vỉ thuốc,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-28 12:40:52
+2,Vỉ thuốc,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-28 12:40:56
+1,Viên rời,"[OK] SẢN PHẨM OK - OK: 2, Lỗi: 0 ()",2026-04-28 12:41:30
+2,Vỉ thuốc,[OK] CHỜ VẬT THỂ,2026-04-28 12:41:55
+1,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (di vat)",2026-04-28 12:44:21
+1,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-28 12:45:08
+2,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-28 12:45:20
+3,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-28 12:45:35
+4,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-28 12:45:47
+5,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-28 12:45:58
+6,Viên rời,"[NG] NG (1 LỖI) - OK: 1, Lỗi: 1 (vo)",2026-04-28 12:46:30
+7,Viên rời,[OK] CHỜ VẬT THỂ,2026-04-28 12:46:47
+8,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (di vat)",2026-04-28 12:47:02
+9,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-28 12:48:09
+10,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-28 12:48:32
+1,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-28 18:10:28
+2,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-28 18:11:06
+3,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (di vat)",2026-04-28 18:11:16
+4,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-28 18:11:30
+5,Vỉ thuốc,"[NG] NG - Dị vật - Phát hiện 1 lỗi:,   • Dị vật",2026-04-28 18:12:06
+6,Vỉ thuốc,[OK] SẢN PHẨM OK - Không phát hiện lỗi trên vỉ,2026-04-28 18:12:10
+7,Vỉ thuốc,"[NG] NG - Dị vật, Thiếu viên - Phát hiện 2 lỗi:,   • Dị vật,   • Thiếu viên",2026-04-28 18:12:25
+8,Vỉ thuốc,[OK] SẢN PHẨM OK - Không phát hiện lỗi trên vỉ,2026-04-28 18:12:29
+9,Vỉ thuốc,[OK] SẢN PHẨM OK - Không phát hiện lỗi trên vỉ,2026-04-28 18:12:43
+10,Vỉ thuốc,"[NG] NG - Thiếu viên, Dị vật - Phát hiện 3 lỗi:,   • Thiếu viên,   • Dị vật",2026-04-28 18:12:57
+11,Vỉ thuốc,[OK] SẢN PHẨM OK - Không phát hiện lỗi trên vỉ,2026-04-28 18:13:15
+12,Vỉ thuốc,"[NG] NG - Thiếu viên - Phát hiện 2 lỗi:,   • Thiếu viên",2026-04-28 18:13:32
+13,Vỉ thuốc,"[NG] NG - Nứt/Vỡ viên - Phát hiện 1 lỗi:,   • Nứt/Vỡ viên",2026-04-28 18:13:50
+14,Vỉ thuốc,"[NG] NG - Nứt/Vỡ viên - Phát hiện 1 lỗi:,   • Nứt/Vỡ viên",2026-04-28 18:14:02
+15,Vỉ thuốc,[OK] SẢN PHẨM OK - Không phát hiện lỗi trên vỉ,2026-04-28 18:14:06
+16,Vỉ thuốc,[OK] SẢN PHẨM OK - Không phát hiện lỗi trên vỉ,2026-04-28 18:14:16
+17,Vỉ thuốc,[OK] SẢN PHẨM OK - Không phát hiện lỗi trên vỉ,2026-04-28 18:14:32
+18,Vỉ thuốc,"[NG] NG - Nứt/Vỡ viên - Phát hiện 1 lỗi:,   • Nứt/Vỡ viên",2026-04-28 18:14:47
+1,Vỉ thuốc,[OK] SẢN PHẨM OK - Không phát hiện lỗi trên vỉ,2026-04-28 18:15:41
+2,Vỉ thuốc,"[NG] NG - Nứt/Vỡ viên - Phát hiện 2 lỗi:,   • Nứt/Vỡ viên",2026-04-28 18:15:52
+3,Vỉ thuốc,"[NG] NG - Nứt/Vỡ viên - Phát hiện 1 lỗi:,   • Nứt/Vỡ viên",2026-04-28 18:15:56
+4,Vỉ thuốc,"[NG] NG - Nứt/Vỡ viên - Phát hiện 2 lỗi:,   • Nứt/Vỡ viên",2026-04-28 18:16:10
+5,Vỉ thuốc,[OK] SẢN PHẨM OK - Không phát hiện lỗi trên vỉ,2026-04-28 18:16:13
+6,Vỉ thuốc,"[NG] NG - Nứt/Vỡ viên - Phát hiện 1 lỗi:,   • Nứt/Vỡ viên",2026-04-28 18:16:34
+7,Vỉ thuốc,[OK] SẢN PHẨM OK - Không phát hiện lỗi trên vỉ,2026-04-28 18:16:49
+8,Vỉ thuốc,"[NG] NG - Dị vật - Phát hiện 1 lỗi:,   • Dị vật",2026-04-28 18:17:14
+9,Vỉ thuốc,"[NG] NG - Thiếu viên - Phát hiện 6 lỗi:,   • Thiếu viên",2026-04-28 18:17:47
+10,Vỉ thuốc,"[NG] NG - Thiếu viên - Phát hiện 4 lỗi:,   • Thiếu viên",2026-04-28 18:18:04
+11,Vỉ thuốc,"[NG] NG - Dị vật - Phát hiện 1 lỗi:,   • Dị vật",2026-04-28 18:18:33
+12,Vỉ thuốc,[OK] SẢN PHẨM OK - Không phát hiện lỗi trên vỉ,2026-04-28 18:18:37
+13,Vỉ thuốc,"[NG] NG - Dị vật - Phát hiện 1 lỗi:,   • Dị vật",2026-04-28 18:18:51
+14,Vỉ thuốc,[OK] SẢN PHẨM OK - Không phát hiện lỗi trên vỉ,2026-04-28 18:19:15
+15,Vỉ thuốc,"[NG] NG - Nứt/Vỡ viên - Phát hiện 1 lỗi:,   • Nứt/Vỡ viên",2026-04-28 18:19:43
+16,Vỉ thuốc,[OK] SẢN PHẨM OK - Không phát hiện lỗi trên vỉ,2026-04-28 18:20:02
+17,Vỉ thuốc,[OK] SẢN PHẨM OK - Không phát hiện lỗi trên vỉ,2026-04-28 18:20:25
+1,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên) - Vỉ chuẩn: 10 viên | Phát hiện: 1 viên,   • Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên)",2026-04-28 18:32:39
+2,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên) - Vỉ chuẩn: 10 viên | Phát hiện: 1 viên,   • Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên)",2026-04-28 18:33:01
+3,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên) - Vỉ chuẩn: 10 viên | Phát hiện: 1 viên,   • Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên)",2026-04-28 18:33:19
+1,Viên rời,"[NG] NG (1 LỖI) - OK: 1, Lỗi: 1 (di vat)",2026-04-28 18:34:06
+2,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên) - Vỉ chuẩn: 10 viên | Phát hiện: 1 viên,   • Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên)",2026-04-28 18:34:24
+3,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên) - Vỉ chuẩn: 10 viên | Phát hiện: 1 viên,   • Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên)",2026-04-28 18:34:39
+4,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên) - Vỉ chuẩn: 10 viên | Phát hiện: 1 viên,   • Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên)",2026-04-28 18:34:58
+5,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên) - Vỉ chuẩn: 10 viên | Phát hiện: 1 viên,   • Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên)",2026-04-28 18:35:25
+6,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên) - Vỉ chuẩn: 10 viên | Phát hiện: 1 viên,   • Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên)",2026-04-28 18:35:40
+1,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-28 19:57:10
+2,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-28 19:57:26
+3,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-28 19:57:44
+1,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-28 20:07:16
+2,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (di vat)",2026-04-28 20:07:28
+3,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-28 20:07:39
+4,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-28 20:07:51
+5,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-28 20:08:02
+6,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-28 20:08:15
+7,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-28 20:08:32
+8,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-28 20:08:50
+9,Viên rời,"[NG] NG (2 LỖI) - OK: 0, Lỗi: 2 (di vat, vo)",2026-04-28 20:09:01
+10,Viên rời,"[NG] NG (2 LỖI) - OK: 1, Lỗi: 2 (vo)",2026-04-28 20:09:21
+11,Viên rời,"[OK] SẢN PHẨM OK - OK: 3, Lỗi: 0 ()",2026-04-28 20:09:33
+12,Viên rời,"[OK] SẢN PHẨM OK - OK: 3, Lỗi: 0 ()",2026-04-28 20:09:44
+13,Viên rời,"[NG] NG (1 LỖI) - OK: 2, Lỗi: 1 (vo)",2026-04-28 20:09:46
+14,Viên rời,"[OK] SẢN PHẨM OK - OK: 3, Lỗi: 0 ()",2026-04-28 20:10:06
+1,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-28 22:45:45
+2,Viên rời,"[OK] SẢN PHẨM OK - OK: 0, Lỗi: 0 ()",2026-04-28 22:46:06
+3,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-28 22:46:44
+1,Viên rời,"[NG] NG (1 LỖI) - OK: 1, Lỗi: 1 (vo)",2026-04-28 22:55:28
+2,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-28 23:00:15
+3,Viên rời,"[NG] NG (2 LỖI) - OK: 0, Lỗi: 2 (vo)",2026-04-28 23:00:26
+4,Viên rời,"[OK] SẢN PHẨM OK - OK: 2, Lỗi: 0 ()",2026-04-28 23:00:54
+5,Viên rời,"[NG] NG (1 LỖI) - OK: 1, Lỗi: 1 (di vat)",2026-04-28 23:01:06
+6,Viên rời,"[NG] NG (1 LỖI) - OK: 1, Lỗi: 1 (vo)",2026-04-28 23:01:17
+7,Viên rời,"[OK] SẢN PHẨM OK - OK: 2, Lỗi: 0 ()",2026-04-28 23:01:32
+8,Viên rời,"[NG] NG (1 LỖI) - OK: 2, Lỗi: 1 (vo)",2026-04-28 23:01:51
+9,Viên rời,"[NG] NG (1 LỖI) - OK: 1, Lỗi: 1 (vo)",2026-04-28 23:02:05
+1,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-28 23:27:02
+2,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-28 23:32:18
+1,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 1 viên (chỉ thấy 9/10 viên) | Thiếu viên trong ô: 8 ô - Vỉ chuẩn: 10 viên | Phát hiện: 9 viên,   • Vỉ bị cắt: thiếu 1 viên (chỉ thấy 9/10 viên),   • Thiếu viên trong ô: 8 ô",2026-04-29 19:22:33
+1,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên) - Vỉ chuẩn: 10 viên | Phát hiện: 1 viên,   • Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên)",2026-04-29 19:29:37
+2,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 6 viên (chỉ thấy 4/10 viên) | Thiếu viên trong ô: 3 ô - Vỉ chuẩn: 10 viên | Phát hiện: 4 viên,   • Vỉ bị cắt: thiếu 6 viên (chỉ thấy 4/10 viên),   • Thiếu viên trong ô: 3 ô",2026-04-29 19:30:09
+3,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên) - Vỉ chuẩn: 10 viên | Phát hiện: 1 viên,   • Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên)",2026-04-29 19:30:52
+4,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên) - Vỉ chuẩn: 10 viên | Phát hiện: 1 viên,   • Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên)",2026-04-29 19:33:49
+5,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 1 viên (chỉ thấy 9/10 viên) | Thiếu viên trong ô: 8 ô - Vỉ chuẩn: 10 viên | Phát hiện: 9 viên,   • Vỉ bị cắt: thiếu 1 viên (chỉ thấy 9/10 viên),   • Thiếu viên trong ô: 8 ô",2026-04-29 19:35:07
+1,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-29 19:40:35
+2,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 2 viên (chỉ thấy 8/10 viên) | Thiếu viên trong ô: 7 ô - Vỉ chuẩn: 10 viên | Phát hiện: 8 viên,   • Vỉ bị cắt: thiếu 2 viên (chỉ thấy 8/10 viên),   • Thiếu viên trong ô: 7 ô",2026-04-29 19:40:56
+3,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 2 viên (chỉ thấy 8/10 viên) | Thiếu viên trong ô: 7 ô - Vỉ chuẩn: 10 viên | Phát hiện: 8 viên,   • Vỉ bị cắt: thiếu 2 viên (chỉ thấy 8/10 viên),   • Thiếu viên trong ô: 7 ô",2026-04-29 19:45:42
+4,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 2 viên (chỉ thấy 8/10 viên) | Thiếu viên trong ô: 7 ô - Vỉ chuẩn: 10 viên | Phát hiện: 8 viên,   • Vỉ bị cắt: thiếu 2 viên (chỉ thấy 8/10 viên),   • Thiếu viên trong ô: 7 ô",2026-04-29 19:46:15
+5,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 1 viên (chỉ thấy 9/10 viên) | Thiếu viên trong ô: 8 ô - Vỉ chuẩn: 10 viên | Phát hiện: 9 viên,   • Vỉ bị cắt: thiếu 1 viên (chỉ thấy 9/10 viên),   • Thiếu viên trong ô: 8 ô",2026-04-29 19:46:37
+6,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 2 viên (chỉ thấy 8/10 viên) | Thiếu viên trong ô: 7 ô - Vỉ chuẩn: 10 viên | Phát hiện: 8 viên,   • Vỉ bị cắt: thiếu 2 viên (chỉ thấy 8/10 viên),   • Thiếu viên trong ô: 7 ô",2026-04-29 19:47:08
+7,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 2 viên (chỉ thấy 8/10 viên) | Thiếu viên trong ô: 7 ô - Vỉ chuẩn: 10 viên | Phát hiện: 8 viên,   • Vỉ bị cắt: thiếu 2 viên (chỉ thấy 8/10 viên),   • Thiếu viên trong ô: 7 ô",2026-04-29 19:47:27
+1,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-29 19:49:46
+2,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-29 19:50:11
+3,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (di vat)",2026-04-29 19:55:49
+4,Viên rời,"[NG] NG (1 LỖI) - OK: 1, Lỗi: 1 (di vat)",2026-04-29 19:55:52
+1,Viên rời,[OK] CHỜ VẬT THỂ,2026-04-29 23:01:57
+2,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 5 viên (chỉ thấy 5/10 viên) | Thiếu viên trong ô: 4 ô - Vỉ chuẩn: 10 viên | Phát hiện: 5 viên,   • Vỉ bị cắt: thiếu 5 viên (chỉ thấy 5/10 viên),   • Thiếu viên trong ô: 4 ô",2026-04-29 23:02:15
+3,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 8 viên (chỉ thấy 2/10 viên) | Thiếu viên trong ô: 1 ô - Vỉ chuẩn: 10 viên | Phát hiện: 2 viên,   • Vỉ bị cắt: thiếu 8 viên (chỉ thấy 2/10 viên),   • Thiếu viên trong ô: 1 ô",2026-04-29 23:02:37
+4,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên) - Vỉ chuẩn: 10 viên | Phát hiện: 1 viên,   • Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên)",2026-04-29 23:03:29
+5,Vỉ thuốc,"[NG] NG - Thiếu viên trong ô: 9 ô - Vỉ chuẩn: 10 viên | Phát hiện: 10 viên,   • Thiếu viên trong ô: 9 ô",2026-04-29 23:03:46
+6,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 3 viên (chỉ thấy 7/10 viên) | Thiếu viên trong ô: 6 ô - Vỉ chuẩn: 10 viên | Phát hiện: 7 viên,   • Vỉ bị cắt: thiếu 3 viên (chỉ thấy 7/10 viên),   • Thiếu viên trong ô: 6 ô",2026-04-29 23:04:35
+7,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên) | Dị vật: 1 chỗ - Vỉ chuẩn: 10 viên | Phát hiện: 1 viên,   • Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên),   • Dị vật: 1 chỗ",2026-04-29 23:05:26
+8,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 7 viên (chỉ thấy 3/10 viên) | Thiếu viên trong ô: 1 ô | Nứt/Vỡ: 1 viên | Dị vật: 1 chỗ - Vỉ chuẩn: 10 viên | Phát hiện: 3 viên,   • Vỉ bị cắt: thiếu 7 viên (chỉ thấy 3/10 viên),   • Thiếu viên trong ô: 1 ô,   • Nứt/Vỡ: 1 viên,   • Dị vật: 1 chỗ",2026-04-29 23:05:45
+9,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 2 viên (chỉ thấy 8/10 viên) | Thiếu viên trong ô: 7 ô - Vỉ chuẩn: 10 viên | Phát hiện: 8 viên,   • Vỉ bị cắt: thiếu 2 viên (chỉ thấy 8/10 viên),   • Thiếu viên trong ô: 7 ô",2026-04-29 23:08:10
+10,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên) - Vỉ chuẩn: 10 viên | Phát hiện: 1 viên,   • Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên)",2026-04-29 23:08:41
+11,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 7 viên (chỉ thấy 3/10 viên) | Thiếu viên trong ô: 1 ô | Nứt/Vỡ: 1 viên | Dị vật: 1 chỗ - Vỉ chuẩn: 10 viên | Phát hiện: 3 viên,   • Vỉ bị cắt: thiếu 7 viên (chỉ thấy 3/10 viên),   • Thiếu viên trong ô: 1 ô,   • Nứt/Vỡ: 1 viên,   • Dị vật: 1 chỗ",2026-04-29 23:12:39
+12,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 5 viên (chỉ thấy 5/10 viên) | Thiếu viên trong ô: 4 ô - Vỉ chuẩn: 10 viên | Phát hiện: 5 viên,   • Vỉ bị cắt: thiếu 5 viên (chỉ thấy 5/10 viên),   • Thiếu viên trong ô: 4 ô",2026-04-29 23:13:10
+13,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên) | Dị vật: 2 chỗ - Vỉ chuẩn: 10 viên | Phát hiện: 1 viên,   • Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên),   • Dị vật: 2 chỗ",2026-04-29 23:14:42
+14,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên) - Vỉ chuẩn: 10 viên | Phát hiện: 1 viên,   • Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên)",2026-04-29 23:16:29
+15,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 8 viên (chỉ thấy 2/10 viên) | Thiếu viên trong ô: 1 ô | Dị vật: 1 chỗ - Vỉ chuẩn: 10 viên | Phát hiện: 2 viên,   • Vỉ bị cắt: thiếu 8 viên (chỉ thấy 2/10 viên),   • Thiếu viên trong ô: 1 ô,   • Dị vật: 1 chỗ",2026-04-29 23:18:02
+16,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 2 viên (chỉ thấy 8/10 viên) | Thiếu viên trong ô: 7 ô - Vỉ chuẩn: 10 viên | Phát hiện: 8 viên,   • Vỉ bị cắt: thiếu 2 viên (chỉ thấy 8/10 viên),   • Thiếu viên trong ô: 7 ô",2026-04-29 23:18:22
+17,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 10 viên (chỉ thấy 0/10 viên) | Dị vật: 1 chỗ - Vỉ chuẩn: 10 viên | Phát hiện: 0 viên,   • Vỉ bị cắt: thiếu 10 viên (chỉ thấy 0/10 viên),   • Dị vật: 1 chỗ",2026-04-29 23:19:07
+18,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 10 viên (chỉ thấy 0/10 viên) | Dị vật: 1 chỗ - Vỉ chuẩn: 10 viên | Phát hiện: 0 viên,   • Vỉ bị cắt: thiếu 10 viên (chỉ thấy 0/10 viên),   • Dị vật: 1 chỗ",2026-04-29 23:19:36
+19,Vỉ thuốc,[OK] CHỜ VẬT THỂ,2026-04-29 23:20:00
+20,Vỉ thuốc,[OK] CHỜ VẬT THỂ,2026-04-29 23:21:14
+21,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 10 viên (chỉ thấy 0/10 viên) | Dị vật: 1 chỗ - Vỉ chuẩn: 10 viên | Phát hiện: 0 viên,   • Vỉ bị cắt: thiếu 10 viên (chỉ thấy 0/10 viên),   • Dị vật: 1 chỗ",2026-04-29 23:22:45
+22,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên) | Dị vật: 1 chỗ - Vỉ chuẩn: 10 viên | Phát hiện: 1 viên,   • Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên),   • Dị vật: 1 chỗ",2026-04-29 23:23:11
+23,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 6 viên (chỉ thấy 4/10 viên) | Thiếu viên trong ô: 3 ô | Dị vật: 1 chỗ - Vỉ chuẩn: 10 viên | Phát hiện: 4 viên,   • Vỉ bị cắt: thiếu 6 viên (chỉ thấy 4/10 viên),   • Thiếu viên trong ô: 3 ô,   • Dị vật: 1 chỗ",2026-04-29 23:23:38
+24,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 6 viên (chỉ thấy 4/10 viên) | Thiếu viên trong ô: 3 ô | Dị vật: 2 chỗ - Vỉ chuẩn: 10 viên | Phát hiện: 4 viên,   • Vỉ bị cắt: thiếu 6 viên (chỉ thấy 4/10 viên),   • Thiếu viên trong ô: 3 ô,   • Dị vật: 2 chỗ",2026-04-29 23:24:32
+25,Vỉ thuốc,"[NG] NG - Vỉ bị cắt: thiếu 10 viên (chỉ thấy 0/10 viên) | Dị vật: 1 chỗ - Vỉ chuẩn: 10 viên | Phát hiện: 0 viên,   • Vỉ bị cắt: thiếu 10 viên (chỉ thấy 0/10 viên),   • Dị vật: 1 chỗ",2026-04-29 23:24:52
+1,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-30 12:17:36
+2,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-30 12:17:56
+3,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-30 12:18:22
+4,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-30 12:18:34
+5,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-30 12:18:46
+6,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-30 12:19:04
+7,Viên rời,"[OK] SẢN PHẨM OK - OK: 2, Lỗi: 0 ()",2026-04-30 12:19:19
+8,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (di vat)",2026-04-30 12:21:37
+9,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-30 12:21:58
+1,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-30 20:35:44
+2,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-30 20:36:12
+1,Viên rời,"[OK] SẢN PHẨM OK - OK: 1, Lỗi: 0 ()",2026-04-30 20:43:18
+2,Viên rời,"[NG] NG (1 LỖI) - OK: 0, Lỗi: 1 (vo)",2026-04-30 20:43:37
+1,Viên rời,[NG] NG (1 LỖI),2026-04-30 22:58:57
+2,Viên rời,[OK] SẢN PHẨM OK,2026-04-30 22:59:14
+3,Viên rời,[NG] NG (1 LỖI),2026-04-30 22:59:21
+4,Viên rời,[OK] SẢN PHẨM OK,2026-04-30 22:59:54
+5,Viên rời,[OK] SẢN PHẨM OK,2026-04-30 23:00:16
+6,Viên rời,[NG] NG (1 LỖI),2026-04-30 23:00:31
+7,Viên rời,[OK] SẢN PHẨM OK,2026-04-30 23:00:48
+1,Viên rời,[NG] NG (1 LỖI),2026-04-30 23:43:10
+2,Viên rời,[OK] SẢN PHẨM OK,2026-04-30 23:43:27
+3,Viên rời,[OK] SẢN PHẨM OK,2026-04-30 23:43:45
+1,Viên rời,[NG] NG (1 LỖI),2026-04-30 23:57:36
+2,Viên rời,[NG] NG (1 LỖI),2026-04-30 23:58:01
+3,Viên rời,[NG] NG (1 LỖI),2026-04-30 23:58:28
+4,Viên rời,[OK] SẢN PHẨM OK,2026-04-30 23:58:53
+1,Viên rời,[OK] SẢN PHẨM OK,2026-05-01 00:04:49
+2,Viên rời,[OK] SẢN PHẨM OK,2026-05-01 00:05:11
+3,Viên rời,[OK] SẢN PHẨM OK,2026-05-01 00:05:33
+4,Viên rời,[NG] NG (2 LỖI),2026-05-01 00:06:18
