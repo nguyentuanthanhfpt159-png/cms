@@ -123,7 +123,8 @@ export default function StickyDashboard() {
     <div className="h-screen w-screen flex flex-col items-center justify-center bg-background p-10 text-center">
       <AlertCircle size={48} className="text-danger mb-4" />
       <h2 className="text-xl font-black mb-2">LỖI KẾT NỐI HỆ THỐNG</h2>
-      <p className="text-default-500 mb-6 max-w-sm">{(data as any).message || "Không thể lấy dữ liệu từ máy chủ AI. Vui lòng kiểm tra lại kết nối Database."}</p>
+      <p className="text-default-500 mb-6 max-w-sm">{(data as any).message || "Không thể lấy dữ liệu từ máy chủ. Vui lòng kiểm tra lại kết nối Database."}</p>
+
       <Button color="primary" variant="flat" onPress={() => window.location.reload()}>THỬ LẠI</Button>
     </div>
   );
@@ -137,7 +138,8 @@ export default function StickyDashboard() {
           <div className="bg-primary p-2 rounded-xl shadow-lg shadow-primary/20">
             <Cpu className="text-white" size={20} />
           </div>
-          <p className="font-black text-xl tracking-tighter">PHARMA<span className="text-primary">AI</span></p>
+          <p className="font-black text-xl tracking-tighter uppercase">PHARMA</p>
+
         </NavbarBrand>
         <NavbarContent justify="end">
           <div className="flex gap-2 md:gap-4 mr-2 md:mr-6">
@@ -265,7 +267,8 @@ export default function StickyDashboard() {
               </div>
               <div>
                 <h2 className="text-2xl font-black tracking-tight">Nhật ký kiểm tra chi tiết</h2>
-                <p className="text-default-400 text-[10px] font-bold uppercase tracking-widest">Hệ thống AI Vision - Realtime Logs</p>
+                <p className="text-default-400 text-[10px] font-bold uppercase tracking-widest">Hệ thống Vision - Realtime Logs</p>
+
               </div>
             </div>
             <Button 
@@ -363,7 +366,8 @@ export default function StickyDashboard() {
       </main>
 
       <footer className="p-12 text-center text-default-400 text-xs border-t border-default-100">
-        &copy; 2026 Pharma AI Systems. Tất cả các quyền được bảo lưu.
+        &copy; 2026 Pharma Systems. Tất cả các quyền được bảo lưu.
+
       </footer>
     </div>
   );

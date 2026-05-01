@@ -6,7 +6,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Pharma AI Dashboard Pro",
+  title: "Pharma Dashboard",
   description: "Hệ thống giám sát dược phẩm thông minh",
 };
 
