@@ -133,33 +133,35 @@ export default function StickyDashboard() {
           <p className="font-black text-xl tracking-tighter">PHARMA<span className="text-primary">AI</span></p>
         </NavbarBrand>
         <NavbarContent justify="end">
-          <div className="flex gap-4 mr-6">
+          <div className="flex gap-2 md:gap-4 mr-2 md:mr-6">
             <ConnectionChip label="PLC" online={data.plc_connected} />
-            <ConnectionChip label="CAMERA" online={data.cam_connected} />
-
+            <ConnectionChip label="CAM" online={data.cam_connected} />
           </div>
-          <User
-            name="Quản trị viên"
-            description="Operator"
-            avatarProps={{ size: "sm", src: "https://i.pravatar.cc/150?u=a04258114e29026702d" }}
-          />
+          <div className="hidden sm:block">
+            <User
+              name="Quản trị viên"
+              description="Operator"
+              avatarProps={{ size: "sm", src: "https://i.pravatar.cc/150?u=a04258114e29026702d" }}
+            />
+          </div>
         </NavbarContent>
       </Navbar>
+
 
       <main className="p-6 md:p-10 max-w-[1400px] mx-auto space-y-8 pb-20">
 
         {/* HEADER */}
-        <div className="flex flex-col md:flex-row justify-between items-end gap-6">
-          <div>
-            <h1 className="text-4xl font-black tracking-tight mb-2">Giám sát Sản xuất</h1>
-            <p className="text-default-500 font-medium italic">Hệ thống theo dõi kiểm tra dược phẩm thời gian thực.</p>
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-end gap-6">
+          <div className="w-full md:w-auto">
+            <h1 className="text-3xl md:text-4xl font-black tracking-tight mb-1 md:mb-2">Giám sát Sản xuất</h1>
+            <p className="text-default-500 text-sm md:text-base font-medium italic">Hệ thống theo dõi dược phẩm Realtime.</p>
           </div>
-          <div className="flex gap-2 p-1.5 bg-default-100 rounded-2xl border border-default-200">
+          <div className="flex w-full md:w-auto gap-2 p-1.5 bg-default-100 rounded-2xl border border-default-200 shadow-inner">
             <Button
               size="md"
               variant={data.current_model === 1 ? "solid" : "light"}
               color={data.current_model === 1 ? "primary" : "default"}
-              className="font-bold px-8"
+              className="font-bold flex-1 md:flex-none px-6 md:px-8"
               onPress={() => setModel(1)}
             >
               VIÊN RỜI
@@ -168,13 +170,14 @@ export default function StickyDashboard() {
               size="md"
               variant={data.current_model === 2 ? "solid" : "light"}
               color={data.current_model === 2 ? "primary" : "default"}
-              className="font-bold px-8"
+              className="font-bold flex-1 md:flex-none px-6 md:px-8"
               onPress={() => setModel(2)}
             >
               VỈ THUỐC
             </Button>
           </div>
         </div>
+
 
         {/* METRICS ROW */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -353,11 +356,23 @@ export default function StickyDashboard() {
 
 function ConnectionChip({ label, online }: { label: string; online: boolean }) {
   return (
-    <Chip size="md" variant="dot" color={online ? "success" : "danger"} className="font-bold px-4">
-      {label}: {online ? "KẾT NỐI" : "MẤT KẾT NỐI"}
-    </Chip>
+    <Tooltip content={`${label}: ${online ? "Đã kết nối" : "Mất kết nối"}`}>
+      <Chip 
+        size="md" 
+        variant="flat" 
+        color={online ? "success" : "danger"} 
+        className="font-black px-2 md:px-4"
+      >
+        <div className="flex items-center gap-1.5">
+          <div className={`w-2 h-2 rounded-full animate-pulse ${online ? "bg-success" : "bg-danger"}`} />
+          <span className="hidden md:inline">{label}: {online ? "ONLINE" : "OFFLINE"}</span>
+          <span className="inline md:hidden text-[10px]">{label}</span>
+        </div>
+      </Chip>
+    </Tooltip>
   );
 }
+
 
 function MetricCard({ title, value, icon, color, description }: { title: string; value: string; icon: React.ReactNode; color: any; description: string }) {
   const colorMap: any = {
