@@ -1,18 +1,5 @@
 {
-  "version": 2,
-  "functions": {
-    "minorepo/app.py": {
-      "runtime": "@vercel/python"
-    }
-  },
   "rewrites": [
-    {
-      "source": "/api/(.*)",
-      "destination": "/minorepo/app.py"
-    },
-    {
-      "source": "/(.*)",
-      "destination": "/minorepo/index.html"
-    }
+    { "source": "/api/(.*)", "destination": "/app.py" }
   ]
 }
