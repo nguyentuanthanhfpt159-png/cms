@@ -2,6 +2,7 @@ from flask import Flask, jsonify
 import os
 import psycopg2
 from dotenv import load_dotenv
+from datetime import datetime
 
 load_dotenv()
 DB_URL = os.getenv("SUPABASE_URL")
@@ -23,14 +24,25 @@ def get_stats():
         
         plc_connected, machine_running, cam_online, current_model, last_update = False, False, False, 1, "--:--:--"
         if row_st:
-            plc_connected, machine_running, cam_online, current_model, last_update_dt = row_st
+            plc_connected, machine_running_db, cam_online, current_model, last_update_dt = row_st
             last_update = last_update_dt.strftime('%H:%M:%S')
+            machine_running = machine_running_db
 
         # 2. Thống kê sản lượng
         cur.execute("SELECT COUNT(*), COUNT(*) FILTER (WHERE is_ng = false), COUNT(*) FILTER (WHERE is_ng = true) FROM inspections")
         total, ok, ng = cur.fetchone()
 
-        # 3. Nhật ký gần nhất (SỬA LỖI: created_at thay vì timestamp)
+        # 3. Phân tích loại lỗi
+        error_types = {"Dị vật": 0, "Vỡ": 0, "Thiếu viên": 0}
+        cur.execute("SELECT result FROM inspections WHERE is_ng = true")
+        rows_ng = cur.fetchall()
+        for r in rows_ng:
+            res_txt = r[0].lower()
+            if "di vat" in res_txt: error_types["Dị vật"] += 1
+            elif "vo" in res_txt or "nut" in res_txt: error_types["Vỡ"] += 1
+            elif "thieu" in res_txt: error_types["Thiếu viên"] += 1
+
+        # 4. Nhật ký gần nhất
         cur.execute("SELECT id, product_name, result, created_at FROM inspections ORDER BY created_at DESC LIMIT 10")
         rows_logs = cur.fetchall()
         recent_logs = [[str(r[0]), r[1], r[2], r[3].strftime('%H:%M:%S')] for r in rows_logs]
@@ -46,13 +58,32 @@ def get_stats():
             "current_model": current_model,
             "last_sync": last_update,
             "recent_logs": recent_logs,
-            "error_types": {"Dị vật": 0, "Vỡ": 0, "Thiếu viên": 0}, # Cần thêm logic nếu muốn chi tiết
-            "hourly_data": [0]*8
+            "error_types": error_types,
+            "hourly_data": [0]*8,
+            "hourly_labels": ['1h','2h','3h','4h','5h','6h','7h','8h']
         })
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)})
 
-# Vercel yêu cầu app này
-def handler(environ, start_response):
-    return app(environ, start_response)
+@app.route('/api/set_model/<int:model_id>')
+def set_model(model_id):
+    if not DB_URL:
+        return jsonify({"status": "error", "message": "Chưa cấu hình SUPABASE_URL"})
+    try:
+        conn = psycopg2.connect(DB_URL)
+        cur = conn.cursor()
+        cur.execute("UPDATE system_status SET current_model_id = %s WHERE id = 1", (model_id,))
+        conn.commit()
+        cur.close()
+        conn.close()
+        return jsonify({"status": "success", "message": f"Đã cập nhật Model ID = {model_id}"})
+    except Exception as e:
+        return jsonify({"status": "error", "message": str(e)})
+
+@app.route('/api/images')
+def get_images():
+    return jsonify([]) # Vercel cannot serve local images
+
+# Vercel needs this 'app' object
+# No need for a separate handler if using the default Flask pattern
