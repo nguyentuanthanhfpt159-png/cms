@@ -25,8 +25,7 @@ def get_stats():
         plc_connected, machine_running, cam_online, current_model, last_update = False, False, False, 1, "--:--:--"
         if row_st:
             plc_connected, machine_running_db, cam_online, current_model, last_update_dt = row_st
-            last_update = last_update_dt.strftime('%d/%m/%Y %H:%M')
-
+            last_update = last_update_dt.strftime('%d/%m/%Y %H:%M') if last_update_dt else "--:--:--"
             machine_running = machine_running_db
 
         # 2. Thống kê sản lượng
@@ -38,15 +37,23 @@ def get_stats():
         cur.execute("SELECT result FROM inspections WHERE is_ng = true")
         rows_ng = cur.fetchall()
         for r in rows_ng:
-            res_txt = r[0].lower()
+            res_txt = r[0].lower() if r[0] else ""
             if "di vat" in res_txt: error_types["Dị vật"] += 1
             elif "vo" in res_txt or "nut" in res_txt: error_types["Vỡ"] += 1
             elif "thieu" in res_txt: error_types["Thiếu viên"] += 1
 
         # 4. Nhật ký gần nhất
-        cur.execute("SELECT id, product_name, result, created_at, image_url FROM inspections ORDER BY created_at DESC LIMIT 10")
+        # Kiểm tra xem cột image_url có tồn tại không trước khi truy vấn
+        cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'inspections' AND column_name = 'image_url'")
+        has_image_col = cur.fetchone() is not None
+        
+        query = "SELECT id, product_name, result, created_at, image_url FROM inspections ORDER BY created_at DESC LIMIT 10" if has_image_col else \
+                "SELECT id, product_name, result, created_at, NULL as image_url FROM inspections ORDER BY created_at DESC LIMIT 10"
+        
+        cur.execute(query)
         rows_logs = cur.fetchall()
-        recent_logs = [[str(r[0]), r[1], r[2], r[3].strftime('%d/%m/%Y %H:%M'), r[4]] for r in rows_logs]
+        recent_logs = [[str(r[0]), r[1], r[2], r[3].strftime('%d/%m/%Y %H:%M') if r[3] else "--/--/-- --:--", r[4]] for r in rows_logs]
+
 
 
 

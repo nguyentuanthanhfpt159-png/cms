@@ -111,6 +111,17 @@ export default function StickyDashboard() {
     </div>
   );
 
+  // Kiểm tra nếu API trả về lỗi
+  if ((data as any).status === "error") return (
+    <div className="h-screen w-screen flex flex-col items-center justify-center bg-background p-10 text-center">
+      <AlertCircle size={48} className="text-danger mb-4" />
+      <h2 className="text-xl font-black mb-2">LỖI KẾT NỐI HỆ THỐNG</h2>
+      <p className="text-default-500 mb-6 max-w-sm">{(data as any).message || "Không thể lấy dữ liệu từ máy chủ AI. Vui lòng kiểm tra lại kết nối Database."}</p>
+      <Button color="primary" variant="flat" onPress={() => window.location.reload()}>THỬ LẠI</Button>
+    </div>
+  );
+
+
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* NAVBAR */}
