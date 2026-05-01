@@ -47,18 +47,6 @@ def get_stats():
         rows_logs = cur.fetchall()
         recent_logs = [[str(r[0]), r[1], r[2], r[3].strftime('%H:%M:%S')] for r in rows_logs]
 
-        cur.close()
-        conn.close()
-
-        return jsonify({
-            "total": total, "ok": ok, "ng": ng,
-            "status": "RUNNING" if machine_running else "STOPPED",
-            "plc_connected": plc_connected,
-            "cam_connected": cam_online,
-            "current_model": current_model,
-            "last_sync": last_update,
-            "recent_logs": recent_logs,
-            "error_types": error_types,
         # 5. Thống kê theo giờ (8 giờ gần nhất)
         cur.execute("""
             SELECT 
@@ -96,6 +84,8 @@ def get_stats():
         })
 
     except Exception as e:
+        if 'conn' in locals() and conn:
+            conn.close()
         return jsonify({"status": "error", "message": str(e)})
 
 @app.route('/api/set_model/<int:model_id>')
