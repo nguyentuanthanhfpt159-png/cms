@@ -77,6 +77,8 @@ interface Stats {
   ng: number;
   total_vien: number;
   total_vi: number;
+  vien_stats: { total: number; ok: number; ng: number };
+  vi_stats: { total: number; ok: number; ng: number };
   status: string;
   plc_connected: boolean;
   cam_connected: boolean;
@@ -277,17 +279,17 @@ export default function StickyDashboard() {
           />
           <MetricCard 
             title={`${data.current_model} Đạt`} 
-            value={`${data.ok.toLocaleString()} ${data.current_model_id === 1 ? 'Viên' : 'Vỉ'}`} 
+            value={`${(data.current_model_id === 1 ? data.vien_stats.ok : data.vi_stats.ok).toLocaleString()} ${data.current_model_id === 1 ? 'Viên' : 'Vỉ'}`} 
             icon={<CheckCircle2 size={24} />} 
             color="success" 
-            description={`Tỷ lệ đạt: ${((data.ok / (data.current_model_id === 1 ? data.total_vien : data.total_vi)) * 100 || 0).toFixed(1)}%`} 
+            description={`Tỷ lệ đạt: ${(((data.current_model_id === 1 ? data.vien_stats.ok : data.vi_stats.ok) / (data.current_model_id === 1 ? data.total_vien : data.total_vi)) * 100 || 0).toFixed(1)}%`} 
           />
           <MetricCard 
             title={`${data.current_model} Lỗi`} 
-            value={`${data.ng.toLocaleString()} ${data.current_model_id === 1 ? 'Viên' : 'Vỉ'}`} 
+            value={`${(data.current_model_id === 1 ? data.vien_stats.ng : data.vi_stats.ng).toLocaleString()} ${data.current_model_id === 1 ? 'Viên' : 'Vỉ'}`} 
             icon={<AlertCircle size={24} />} 
             color="danger" 
-            description={`Tỷ lệ lỗi: ${((data.ng / (data.current_model_id === 1 ? data.total_vien : data.total_vi)) * 100 || 0).toFixed(1)}%`} 
+            description={`Tỷ lệ lỗi: ${(((data.current_model_id === 1 ? data.vien_stats.ng : data.vi_stats.ng) / (data.current_model_id === 1 ? data.total_vien : data.total_vi)) * 100 || 0).toFixed(1)}%`} 
           />
         </div>
 
