@@ -12,6 +12,7 @@ DB_URL = os.getenv("SUPABASE_URL")
 app = Flask(__name__)
 
 @app.route('/api/export')
+@app.route('/export')
 def export_all():
     if not DB_URL:
         return "Chưa cấu hình Database", 500
@@ -51,6 +52,7 @@ def export_all():
         return str(e), 500
 
 @app.route('/api/stats')
+@app.route('/stats')
 
 def get_stats():
     if not DB_URL:
@@ -169,6 +171,7 @@ def get_stats():
         return jsonify({"status": "error", "message": str(e)})
 
 @app.route('/api/set_model/<int:model_id>')
+@app.route('/set_model/<int:model_id>')
 def set_model(model_id):
     if not DB_URL:
         return jsonify({"status": "error", "message": "Chưa cấu hình SUPABASE_URL"})
@@ -185,6 +188,7 @@ def set_model(model_id):
         return jsonify({"status": "error", "message": str(e)})
 
 @app.route('/api/images')
+@app.route('/images')
 def get_images():
     return jsonify([])
 
