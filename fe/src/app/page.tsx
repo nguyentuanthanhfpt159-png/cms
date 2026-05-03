@@ -262,16 +262,34 @@ export default function StickyDashboard() {
 
         {/* METRICS ROW */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          <MetricCard title="Trạng thái máy" value={data.status === "RUNNING" ? "ĐANG CHẠY" : "ĐANG DỪNG"} icon={<Activity size={24} />} color="primary" description={data.status === "RUNNING" ? "Vận hành ổn định" : "Máy đã tạm dừng"} />
           <MetricCard 
-            title="Tổng sản lượng" 
+            title="Trạng thái máy" 
+            value={data.status === "RUNNING" ? "ĐANG CHẠY" : "ĐANG DỪNG"} 
+            icon={<Activity size={24} />} 
+            color="primary" 
+            description={data.status === "RUNNING" ? "Vận hành ổn định" : "Máy đã tạm dừng"} 
+          />
+          <MetricCard 
+            title={`Tổng ${data.current_model}`} 
             value={data.total.toLocaleString()} 
             icon={<Box size={24} />} 
             color="secondary" 
-            description={`Viên: ${data.total_vien} | Vỉ: ${data.total_vi}`} 
+            description={`Tổng quát: Viên(${data.total_vien}) | Vỉ(${data.total_vi})`} 
           />
-          <MetricCard title="Sản phẩm Đạt" value={data.ok.toLocaleString()} icon={<CheckCircle2 size={24} />} color="success" description={`Tỷ lệ: ${((data.ok / data.total) * 100 || 0).toFixed(1)}%`} />
-          <MetricCard title="Sản phẩm Lỗi" value={data.ng.toLocaleString()} icon={<AlertCircle size={24} />} color="danger" description={`Tỷ lệ: ${((data.ng / data.total) * 100 || 0).toFixed(1)}%`} />
+          <MetricCard 
+            title={`${data.current_model} Đạt`} 
+            value={data.ok.toLocaleString()} 
+            icon={<CheckCircle2 size={24} />} 
+            color="success" 
+            description={`Tỷ lệ đạt: ${((data.ok / data.total) * 100 || 0).toFixed(1)}%`} 
+          />
+          <MetricCard 
+            title={`${data.current_model} Lỗi`} 
+            value={data.ng.toLocaleString()} 
+            icon={<AlertCircle size={24} />} 
+            color="danger" 
+            description={`Tỷ lệ lỗi: ${((data.ng / data.total) * 100 || 0).toFixed(1)}%`} 
+          />
         </div>
 
         {/* CHARTS SECTION - NORMAL SCROLL */}
