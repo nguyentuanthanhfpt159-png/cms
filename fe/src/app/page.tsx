@@ -21,7 +21,12 @@ import {
   User,
   Progress,
   Divider,
-  Tooltip
+  Tooltip,
+  Modal,
+  ModalContent,
+  ModalHeader,
+  ModalBody,
+  useDisclosure
 } from "@nextui-org/react";
 import {
   CheckCircle2,
@@ -89,6 +94,8 @@ export default function StickyDashboard() {
   const [user, setUser] = useState<any>(null);
   const [role, setRole] = useState<string>("user");
   const [isCheckingAuth, setIsCheckingAuth] = useState(true);
+  const [selectedImage, setSelectedImage] = useState<string | null>(null);
+  const { isOpen, onOpen, onOpenChange } = useDisclosure();
   const router = useRouter();
 
   const checkUser = async () => {
@@ -387,14 +394,23 @@ export default function StickyDashboard() {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="w-16 h-12 bg-default-100 rounded-lg flex items-center justify-center border border-default-200 overflow-hidden relative group cursor-zoom-in shadow-sm">
+                        <div 
+                          className="w-16 h-12 bg-default-100 rounded-lg flex items-center justify-center border border-default-200 overflow-hidden relative group cursor-zoom-in shadow-sm"
+                          onClick={() => {
+                            const imgSrc = log[4] || (log[1].toUpperCase().includes('VIÊN')
+                              ? "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=800&q=80"
+                              : "https://images.unsplash.com/photo-1550572017-ed2002061266?w=800&q=80");
+                            setSelectedImage(imgSrc);
+                            onOpen();
+                          }}
+                        >
                           <img
                             src={log[4] || (log[1].toUpperCase().includes('VIÊN')
                               ? "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=200&q=80"
                               : "https://images.unsplash.com/photo-1550572017-ed2002061266?w=200&q=80")
                             }
                             alt="Inspection"
-                            className="w-full h-full object-cover group-hover:scale-150 transition-transform duration-500"
+                            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
                             onError={(e) => {
                               (e.target as HTMLImageElement).src = "https://placehold.co/200x160/18181b/ffffff?text=NO+IMAGE";
                             }}
@@ -434,6 +450,40 @@ export default function StickyDashboard() {
           </div>
         </div>
       </main>
+      
+      {/* IMAGE MODAL */}
+      <Modal 
+        isOpen={isOpen} 
+        onOpenChange={onOpenChange} 
+        size="4xl" 
+        backdrop="blur"
+        classNames={{
+          base: "bg-[#050505] border border-default-100",
+          header: "border-b border-default-100",
+        }}
+      >
+        <ModalContent>
+          {(onClose) => (
+            <>
+              <ModalHeader className="flex flex-col gap-1">
+                <span className="text-sm font-black tracking-widest uppercase text-primary">Chi tiết hình ảnh kiểm tra</span>
+              </ModalHeader>
+              <ModalBody className="p-0 overflow-hidden flex items-center justify-center bg-black min-h-[400px]">
+                {selectedImage && (
+                  <img 
+                    src={selectedImage} 
+                    alt="Full Inspection" 
+                    className="max-w-full max-h-[80vh] object-contain"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).src = "https://placehold.co/800x600/18181b/ffffff?text=LỖI+TẢI+ẢNH";
+                    }}
+                  />
+                )}
+              </ModalBody>
+            </>
+          )}
+        </ModalContent>
+      </Modal>
 
       <footer className="p-12 text-center text-default-400 text-xs border-t border-default-100">
         &copy; 2026 Pharma Systems. Tất cả các quyền được bảo lưu.

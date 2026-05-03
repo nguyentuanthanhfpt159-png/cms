@@ -124,3 +124,7 @@ STT,Sản phẩm,Kết quả,Thời gian
 7,Viên rời,[OK] SẢN PHẨM OK,2026-05-03 12:04:01
 0,Vỉ thuốc,[NG] NG - Vỉ bị cắt: thiếu 8 viên (chỉ thấy 2/10 viên) | Nứt/Vỡ: 1 viên,2026-05-03 12:23:49
 1,Viên rời,[OK] SẢN PHẨM OK,2026-05-03 12:24:22
+2,Viên rời,[NG] NG (1 LỖI),2026-05-03 13:02:36
+4,Viên rời,[OK] SẢN PHẨM OK,2026-05-03 13:07:17
+5,Viên rời,[OK] SẢN PHẨM OK,2026-05-03 13:11:06
+6,Viên rời,[OK] SẢN PHẨM OK,2026-05-03 13:19:40

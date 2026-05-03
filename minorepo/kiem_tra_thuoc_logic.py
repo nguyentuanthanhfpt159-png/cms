@@ -441,7 +441,7 @@ if __name__ == "__main__":
         ret, frame = cap.read()
         if not ret: break
         
-        annotated_frame, status, code, err, detail = process_frame(frame, model, names)
+        annotated_frame, status, code, err, detail, n_ok, n_ng = process_frame(frame, model, names)
         
         # Loại bỏ dấu tiếng Việt để cv2.putText hiển thị không bị lỗi font (???)
         status_no_accent = remove_accents(status)
@@ -468,4 +468,4 @@ def process_image(image_path, model, class_names, conf_threshold=None):
     if frame is None:
         return None, "Lỗi đọc ảnh", "LỖI FILE", True, ["Không tìm thấy file"], 0, 1
     
-    return process_frame(frame, model, class_names)
+    return process_frame(frame, model, class_names, conf_threshold=conf_threshold)
