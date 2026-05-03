@@ -80,7 +80,8 @@ interface Stats {
   status: string;
   plc_connected: boolean;
   cam_connected: boolean;
-  current_model: number;
+  current_model: string;
+  current_model_id: number;
   last_sync: string;
   error_types: Record<string, number>;
   recent_logs: [string, string, string, string, string | null][];
@@ -239,8 +240,8 @@ export default function StickyDashboard() {
           <div className="flex w-full md:w-auto gap-2 p-1.5 bg-default-100 rounded-2xl border border-default-200 shadow-inner">
             <Button
               size="md"
-              variant={data.current_model === 1 ? "solid" : "light"}
-              color={data.current_model === 1 ? "primary" : "default"}
+              variant={data.current_model_id === 1 ? "solid" : "light"}
+              color={data.current_model_id === 1 ? "primary" : "default"}
               className="font-bold flex-1 md:flex-none px-6 md:px-8"
               onPress={() => setModel(1)}
             >
@@ -248,8 +249,8 @@ export default function StickyDashboard() {
             </Button>
             <Button
               size="md"
-              variant={data.current_model === 2 ? "solid" : "light"}
-              color={data.current_model === 2 ? "primary" : "default"}
+              variant={data.current_model_id === 2 ? "solid" : "light"}
+              color={data.current_model_id === 2 ? "primary" : "default"}
               className="font-bold flex-1 md:flex-none px-6 md:px-8"
               onPress={() => setModel(2)}
             >

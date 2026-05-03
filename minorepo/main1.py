@@ -261,22 +261,26 @@ class App:
                     continue
 
             try:
-                # --- KIỂM TRA LỆNH TỪ WEB DASHBOARD (COMMAND.JSON) ---
-                cmd_path = os.path.join(BASE_DIR, "command.json")
-                if os.path.exists(cmd_path):
-                    try:
-                        with open(cmd_path, "r") as f:
-                            cmd_data = json.load(f)
-                        if cmd_data.get("cmd") == "set_model":
-                            target_id = cmd_data.get("value")
-                            print(f">>> NHẬN LỆNH ĐỔI MODEL TỪ WEB: {target_id}")
-                            logic.send_product_id_to_plc(target_id)
-                            model_name = "Viên rời" if target_id == 1 else "Vỉ thuốc"
-                            self.root.after(0, lambda n=model_name: self.combo_product.set(n))
-                            self.root.after(0, self.on_product_change)
-                        os.remove(cmd_path)
-                    except Exception as e:
-                        print(f"Lỗi xử lý lệnh từ Web: {e}")
+                # --- KIỂM TRA LỆNH TỪ WEB DASHBOARD (SUPABASE) ---
+                try:
+                    with psycopg2.connect(DB_URL) as conn:
+                        with conn.cursor() as cur:
+                            cur.execute("SELECT current_model_id FROM system_status WHERE id = 1")
+                            row = cur.fetchone()
+                            if row:
+                                remote_id = row[0]
+                                local_id = 1 if self.current_product == "Viên rời" else 2
+                                if remote_id != local_id:
+                                    print(f">>> NHẬN LỆNH ĐỔI MODEL TỪ WEB: {remote_id}")
+                                    model_name = "Viên rời" if remote_id == 1 else "Vỉ thuốc"
+                                    # Cập nhật UI và nạp model mới
+                                    self.root.after(0, lambda n=model_name: self.combo_product.set(n))
+                                    self.current_product = model_name
+                                    self.load_selected_model(MODELS_CONFIG[model_name])
+                                    # Đồng bộ xuống PLC
+                                    logic.send_product_id_to_plc(remote_id)
+                except Exception as e:
+                    print(f"Lỗi đọc lệnh từ Supabase: {e}")
 
                 # --- ĐỒNG BỘ COUNTER TỪ PLC (Hỗ trợ Reset từ ThingsBoard) ---
                 # Nếu PLC trả về 0 (đã bị reset), ta phải reset biến Python tương ứng
