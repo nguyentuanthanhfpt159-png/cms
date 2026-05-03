@@ -15,6 +15,9 @@ import snap7
 import psycopg2
 from dotenv import load_dotenv
 
+# --- ĐƯỜNG DẪN GỐC ---
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 # Load biến môi trường từ file .env
 load_dotenv()
 DB_URL = os.getenv("SUPABASE_URL")
@@ -29,8 +32,8 @@ print(">>> Nạp module thành công.")
 # --- DANH MỤC MODEL ---2
 MODELS_CONF_THRESHOLD = 0.5  
 MODELS_CONFIG = {
-    "Viên rời": r"C:\Users\admin\Downloads\thuocvienL.pt",
-    "Vỉ thuốc": r"C:\Users\admin\Downloads\thuoc_yolov8s_best.pt" # Bạn hãy sửa đường dẫn này cho đúng file vỉ thuốc nhé
+    "Viên rời": os.path.join(BASE_DIR, "source", "thuocvienL.pt"),
+    "Vỉ thuốc": os.path.join(BASE_DIR, "source", "thuoc_yolov8s_best.pt")
 }
 DEFAULT_PRODUCT = "Viên rời"
 CAM_SOURCE ="http://192.168.1.110:4747/video"
@@ -41,11 +44,10 @@ ESP32_IP = "192.168.1.100"
 # --- CẤU HÌNH ĐỒNG BỘ (Căn chỉnh thực tế tại đây) ---
 # Delay riêng cho từng loại sản phẩm (đơn vị: giây)
 CAPTURE_DELAY_VIEN = 0.0   # Viên rời: chụp NGAY khi cảm biến kích (không delay)
-CAPTURE_DELAY_VI   = 1.2      # Vỉ thuốc: chờ 0.3s để vỉ vào đúng tâm ảnh (chỉnh theo thực tế)
+CAPTURE_DELAY_VI   = 0.85      # Vỉ thuốc: chờ 1.1s để vỉ vào đúng tâm ảnh (đã hiệu chuẩn)
 PLC_SIGNAL_DURATION = 0.8  # (Giây) Thời gian giữ tín hiệu kết quả trên PLC
 
 # Thư mục lưu trữ chuyên nghiệp
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 HISTORY_DIR = os.path.join(BASE_DIR, "captured_history")
 NG_DIR = os.path.join(HISTORY_DIR, "NG")
 OK_DIR = os.path.join(HISTORY_DIR, "OK")
@@ -102,41 +104,39 @@ class CameraStream:
         while self.running:
             try:
                 if self.cap.isOpened():
-                    ret, frame = self.cap.read()
-                    if ret and frame is not None:
-                        # 1. Kiểm tra xem ảnh có bị "đứng" không (Dành cho DroidCam/Virtual Cam)
-                        # Chúng ta lấy một vùng nhỏ ở giữa ảnh để so sánh cho nhanh
-                        h, w = frame.shape[:2]
-                        sample = frame[h//2-50:h//2+50, w//2-50:w//2+50].tobytes()
+                    # grab() chỉ đẩy khung hình vào hàng đợi, cực nhanh và giúp xả buffer
+                    if not self.cap.grab():
+                        time.sleep(0.1)
+                        continue
                         
+                    # Chúng ta vẫn cần đọc frame để kiểm tra tính online của camera
+                    # nhưng sẽ làm với tần suất thấp hơn hoặc tối ưu hơn
+                    ret, frame = self.cap.retrieve()
+                    if ret and frame is not None:
+                        # Kiểm tra camera online (pixel change)
+                        h, w = frame.shape[:2]
+                        sample = frame[h//2-5:h//2+5, w//2-5:w//2+5].tobytes()
                         if sample == self.last_frame_data:
                             self.stale_counter += 1
                         else:
                             self.stale_counter = 0
-                            self.real_online = True # Có thay đổi pixel = Camera thật đang chạy
+                            self.real_online = True
                         
                         self.last_frame_data = sample
-                        
-                        # Nếu ảnh đứng im quá 20 khung hình (khoảng 0.7 giây) -> Coi như mất kết nối
-                        if self.stale_counter > 20:
+                        if self.stale_counter > 50: # Tăng ngưỡng vì grab chạy rất nhanh
                             self.real_online = False
-                        
+                            
                         self.ret = self.real_online
                         self.frame = frame
-                    else:
-                        self.ret = False
-                        time.sleep(0.1)
                 else:
-                    self.ret = False
-                    # Nếu mất kết nối, thử mở lại sau 2 giây
-                    print(">>> Camera mất kết nối, đang thử lại...")
-                    self.cap.release()
-                    time.sleep(2.0)
+                    time.sleep(1.0)
                     self.cap = cv2.VideoCapture(CAM_SOURCE)
-            except Exception as e:
-                self.ret = False
-                print(f"Lỗi Camera: {e}")
+            except:
                 time.sleep(1.0)
+
+    def read(self):
+        # Khi App cần ảnh, ta lấy ảnh mới nhất từ luồng
+        return self.ret, self.frame
 
         self.running = False
         self.cap.release()
@@ -195,7 +195,8 @@ class App:
         self.is_paused = False
         self.is_processing = False
         self.last_sensor_state = False
-        self.total_count = 0
+        self.plc_connected = False
+        self.last_remote_change_time = 0 # Thời điểm cuối cùng đổi model từ Web
 
 
         # --- UI Fonts ---
@@ -262,6 +263,8 @@ class App:
 
             try:
                 # --- KIỂM TRA LỆNH TỪ WEB DASHBOARD (SUPABASE) ---
+                # --- KIỂM TRA LỆNH TỪ WEB DASHBOARD (SUPABASE) ---
+                DEBUG_LOG = r"d:\cms\minorepo\debug_log.txt"
                 try:
                     with psycopg2.connect(DB_URL) as conn:
                         with conn.cursor() as cur:
@@ -270,8 +273,14 @@ class App:
                             if row:
                                 remote_id = row[0]
                                 local_id = 1 if self.current_product == "Viên rời" else 2
+                                # Log nhịp tim mỗi vòng lặp
+                                with open(DEBUG_LOG, "a") as f_log: f_log.write(f"[{time.ctime()}] Polling: Remote={remote_id}, Local={local_id}\n")
+                                
                                 if remote_id != local_id:
-                                    print(f">>> NHẬN LỆNH ĐỔI MODEL TỪ WEB: {remote_id}")
+                                    log_msg = f"[{time.ctime()}] WEB CMD: Remote={remote_id}, Local={local_id}. SWITCHING..."
+                                    print(log_msg)
+                                    with open(DEBUG_LOG, "a") as f_log: f_log.write(log_msg + "\n")
+                                    
                                     model_name = "Viên rời" if remote_id == 1 else "Vỉ thuốc"
                                     # Cập nhật UI và nạp model mới
                                     self.root.after(0, lambda n=model_name: self.combo_product.set(n))
@@ -279,6 +288,7 @@ class App:
                                     self.load_selected_model(MODELS_CONFIG[model_name])
                                     # Đồng bộ xuống PLC
                                     logic.send_product_id_to_plc(remote_id)
+                                    self.last_remote_change_time = time.time()
                 except Exception as e:
                     print(f"Lỗi đọc lệnh từ Supabase: {e}")
 
@@ -337,18 +347,20 @@ class App:
                         if not self.is_processing:
                             print(f">>> CẢM BIẾN KÍCH HOẠT (Bit 0.1)! Bắt đầu kiểm tra mẫu: {self.current_product}", flush=True)
                             delay = CAPTURE_DELAY_VI if self.current_product == "Vỉ thuốc" else CAPTURE_DELAY_VIEN
+                            
+                            # Xử lý delay
                             if delay > 0: time.sleep(delay)
+                            
                             self.root.after(0, self.perform_check)
                     self.last_sensor_state = current_sensor
 
-                    # Kiểm tra lệnh đổi model từ PLC
-                    plc_product_id = logic.read_product_id_from_plc() 
-                    expected_id = 1 if self.current_product == "Viên rời" else 2
-                    if plc_product_id > 0 and plc_product_id != expected_id:
-                        new_name = "Viên rời" if plc_product_id == 1 else "Vỉ thuốc"
-                        self.current_product = new_name
-                        self.root.after(0, lambda n=new_name: self.combo_product.set(n))
-                        self.root.after(0, lambda p=MODELS_CONFIG[new_name]: self.load_selected_model(p))
+                    # Kiểm tra lệnh đổi model từ PLC (Chỉ để log và ép PLC theo Web)
+                    if time.time() - self.last_remote_change_time > 5:
+                        plc_product_id = logic.read_product_id_from_plc() 
+                        expected_id = 1 if self.current_product == "Viên rời" else 2
+                        if plc_product_id > 0 and plc_product_id != expected_id:
+                            # print(f"PLC lệch Model: PLC={plc_product_id}, Web={expected_id}. Đang sửa lại...")
+                            logic.send_product_id_to_plc(expected_id)
                 
                 # --- GHI TRẠNG THÁI HỆ THỐNG CHO WEB DASHBOARD & PLC ---
                 self.write_status_to_json(self.plc_connected, system_active)
@@ -391,21 +403,19 @@ class App:
                 cur.execute("SET TIME ZONE 'Asia/Ho_Chi_Minh';")
                 # Thử cập nhật thêm các cột số lượng nếu có trong bảng system_status
                 cur.execute("""
-                    INSERT INTO system_status (id, plc_online, machine_running, cam_online, current_model_id, last_update,
+                    INSERT INTO system_status (id, plc_online, machine_running, cam_online, last_update,
                                              vien_ok, vien_ng, vi_ok, vi_ng)
-                    VALUES (1, %s, %s, %s, %s, NOW(), %s, %s, %s, %s)
+                    VALUES (1, %s, %s, %s, NOW(), %s, %s, %s, %s)
                     ON CONFLICT (id) DO UPDATE SET 
                         plc_online = EXCLUDED.plc_online,
                         machine_running = EXCLUDED.machine_running,
                         cam_online = EXCLUDED.cam_online,
-                        current_model_id = EXCLUDED.current_model_id,
                         last_update = EXCLUDED.last_update,
                         vien_ok = EXCLUDED.vien_ok,
                         vien_ng = EXCLUDED.vien_ng,
                         vi_ok = EXCLUDED.vi_ok,
                         vi_ng = EXCLUDED.vi_ng;
                 """, (plc_online, machine_running, getattr(self, 'cam_connected', False), 
-                       1 if self.current_product == "Viên rời" else 2,
                        self.vien_ok, self.vien_ng, self.vi_ok, self.vi_ng))
                 conn.commit()
                 cur.close()
@@ -417,15 +427,14 @@ class App:
                     cur = conn.cursor()
                     cur.execute("SET TIME ZONE 'Asia/Ho_Chi_Minh';")
                     cur.execute("""
-                        INSERT INTO system_status (id, plc_online, machine_running, cam_online, current_model_id, last_update)
-                        VALUES (1, %s, %s, %s, %s, NOW())
+                        INSERT INTO system_status (id, plc_online, machine_running, cam_online, last_update)
+                        VALUES (1, %s, %s, %s, NOW())
                         ON CONFLICT (id) DO UPDATE SET 
                             plc_online = EXCLUDED.plc_online,
                             machine_running = EXCLUDED.machine_running,
                             cam_online = EXCLUDED.cam_online,
-                            current_model_id = EXCLUDED.current_model_id,
                             last_update = EXCLUDED.last_update;
-                    """, (plc_online, machine_running, getattr(self, 'cam_connected', False), 1 if self.current_product == "Viên rời" else 2))
+                    """, (plc_online, machine_running, getattr(self, 'cam_connected', False)))
                     conn.commit()
                     cur.close()
                     conn.close()
@@ -524,9 +533,10 @@ class App:
             self.reset_system()
             return
         best_frame = f.copy()
-        import numpy as np
-        kernel = np.array([[0, -1, 0], [-1, 5,-1], [0, -1, 0]])
-        best_frame = cv2.filter2D(best_frame, -1, kernel)
+        # Loại bỏ filter làm sắc nét để tránh tạo nhiễu giả cho AI
+        # import numpy as np
+        # kernel = np.array([[0, -1, 0], [-1, 5,-1], [0, -1, 0]])
+        # best_frame = cv2.filter2D(best_frame, -1, kernel)
         threading.Thread(target=self.worker_process, args=(best_frame,), daemon=True).start()
 
     def worker_process(self, frame):

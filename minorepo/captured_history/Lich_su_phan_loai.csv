@@ -128,3 +128,35 @@ STT,Sản phẩm,Kết quả,Thời gian
 4,Viên rời,[OK] SẢN PHẨM OK,2026-05-03 13:07:17
 5,Viên rời,[OK] SẢN PHẨM OK,2026-05-03 13:11:06
 6,Viên rời,[OK] SẢN PHẨM OK,2026-05-03 13:19:40
+6,Viên rời,[OK] CHỜ VẬT THỂ,2026-05-03 13:40:53
+7,Viên rời,[NG] NG (1 LỖI),2026-05-03 13:41:26
+7,Viên rời,[NG] NG (1 LỖI),2026-05-03 13:42:25
+8,Viên rời,[NG] NG (1 LỖI),2026-05-03 13:43:05
+9,Vỉ thuốc,[NG] NG - Vỉ bị cắt: thiếu 6 viên (chỉ thấy 4/10 viên) | Nứt/Vỡ: 3 viên,2026-05-03 13:43:36
+10,Vỉ thuốc,[NG] NG - Vỉ bị cắt: thiếu 7 viên (chỉ thấy 3/10 viên) | Nứt/Vỡ: 2 viên,2026-05-03 13:45:18
+11,Vỉ thuốc,[NG] NG - Vỉ bị cắt: thiếu 7 viên (chỉ thấy 3/10 viên) | Nứt/Vỡ: 2 viên,2026-05-03 13:50:14
+13,Vỉ thuốc,[NG] NG - Vỉ bị cắt: thiếu 7 viên (chỉ thấy 3/10 viên) | Nứt/Vỡ: 2 viên,2026-05-03 13:52:41
+13,Vỉ thuốc,[NG] NG - Vỉ bị cắt: thiếu 5 viên (chỉ thấy 5/10 viên) | Thiếu viên trong ô: 4 ô,2026-05-03 13:52:57
+14,Vỉ thuốc,[NG] NG - Vỉ bị cắt: thiếu 3 viên (chỉ thấy 7/10 viên) | Thiếu viên trong ô: 6 ô,2026-05-03 13:53:09
+15,Vỉ thuốc,[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên),2026-05-03 13:53:38
+16,Vỉ thuốc,[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên),2026-05-03 14:01:51
+17,Vỉ thuốc,[NG] NG - Vỉ bị cắt: thiếu 7 viên (chỉ thấy 3/10 viên) | Thiếu viên trong ô: 2 ô,2026-05-03 14:02:13
+18,Vỉ thuốc,[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên),2026-05-03 14:02:44
+19,Vỉ thuốc,[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên) | Dị vật: 2 chỗ,2026-05-03 14:02:56
+20,Vỉ thuốc,[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên),2026-05-03 14:03:17
+21,Vỉ thuốc,[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên),2026-05-03 14:06:20
+22,Vỉ thuốc,[NG] NG - Vỉ bị cắt: thiếu 8 viên (chỉ thấy 2/10 viên) | Nứt/Vỡ: 1 viên,2026-05-03 14:06:29
+23,Vỉ thuốc,[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên),2026-05-03 14:07:39
+24,Vỉ thuốc,[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên),2026-05-03 14:08:12
+25,Vỉ thuốc,[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên),2026-05-03 14:08:28
+27,Vỉ thuốc,[NG] NG - Vỉ bị cắt: thiếu 9 viên (chỉ thấy 1/10 viên),2026-05-03 14:09:54
+27,Vỉ thuốc,[NG] NG (1 LỖI),2026-05-03 14:20:47
+28,Vỉ thuốc,[NG] NG (1 LỖI),2026-05-03 14:21:01
+30,Vỉ thuốc,[OK] SẢN PHẨM OK,2026-05-03 14:28:14
+30,Vỉ thuốc,[NG] NG - Nứt/Vỡ: 1 viên | Dị vật: 1 chỗ,2026-05-03 14:28:29
+32,Vỉ thuốc,[NG] NG - Thiếu viên trong ô: 4 ô,2026-05-03 14:28:54
+33,Vỉ thuốc,[NG] NG - Thiếu viên trong ô: 1 ô | Dị vật: 1 chỗ,2026-05-03 14:29:26
+33,Vỉ thuốc,[OK] SẢN PHẨM OK,2026-05-03 14:29:38
+34,Vỉ thuốc,[NG] NG - Nứt/Vỡ: 1 viên,2026-05-03 14:29:58
+35,Vỉ thuốc,[NG] NG - Dị vật: 1 chỗ,2026-05-03 14:30:15
+36,Vỉ thuốc,[NG] NG - Thiếu viên trong ô: 3 ô | Dị vật: 1 chỗ,2026-05-03 14:30:40

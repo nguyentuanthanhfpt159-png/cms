@@ -264,15 +264,15 @@ VI_THUOC_NG_LABELS = {
     'di_vat'    : 'Dị vật',
 }
 
-# --- SỐ VIÊN CHUẨN CHO MỖI VỈ ---
-SO_VIEN_CHUAN_VI = 10
+# --- SỐ VIÊN CHUẨN CHO MỖI VỈ (Model hiện tại nhận diện nguyên vỉ là 1 vật thể) ---
+SO_VIEN_CHUAN_VI = 1
 
 CONF_THRESHOLD = 0.5
 def apply_static_crop(frame):
     h, w = frame.shape[:2]
-    # Thu hẹp chiều ngang, Kéo dài chiều dọc (Hình chữ nhật đứng ôm theo băng tải)
-    x1, x2 = int(w * 0.25), int(w * 0.75)
-    y1, y2 = int(h * 0.10), int(h * 0.90)
+    # Mở rộng vùng quét để tránh mất viên ở rìa vỉ
+    x1, x2 = int(w * 0.15), int(w * 0.85)
+    y1, y2 = int(h * 0.05), int(h * 0.95)
     cropped = frame[y1:y2, x1:x2]
     return cropped
 
@@ -358,51 +358,31 @@ def process_frame(frame, model, class_names, conf_threshold=None):
         if is_vi_thuoc_model:
             loi_list = []  # Danh sách mô tả lỗi
 
-            # 1️⃣ Kiểm tra vỉ bị CẮt (số slot detect được ít hơn chuẩn)
-            #    Mỗi box vi_thuoc hoặc thieu_vien = 1 slot hiện diện
-            #    Nếu tổng slot < SO_VIEN_CHUAN_VI → vỉ bị cắt bớt
-            so_slot_phat_hien = count_vi_thuoc
-            chenh_lech = SO_VIEN_CHUAN_VI - so_slot_phat_hien
-
-            if chenh_lech > 0:
-                # Thiếu slot do bị cắt vỏ
-                loi_list.append(
-                    f"Vỉ bị cắt: thiếu {chenh_lech} viên "
-                    f"(chỉ thấy {so_slot_phat_hien}/{SO_VIEN_CHUAN_VI} viên)"
-                )
-            elif chenh_lech < 0:
-                # Thừa slot (vỉ có nhiều hơn chuẩn)
-                loi_list.append(
-                    f"Thừa viên: phát hiện {so_slot_phat_hien}/{SO_VIEN_CHUAN_VI} viên"
-                )
-
-            # 2️⃣ Kiểm tra viên bị lấy ra khỏi slot (vang viên, slot vẫn còn nguyên)
+            # 1️⃣ Kiểm tra các lỗi vật lý (Nếu model phát hiện ra các nhãn lỗi)
             if count_thieu_vien > 0:
                 loi_list.append(f"Thiếu viên trong ô: {count_thieu_vien} ô")
-
-            # 3️⃣ Kiểm tra nứt/vỡ
             if count_nut_vo > 0:
                 loi_list.append(f"Nứt/Vỡ: {count_nut_vo} viên")
-
-            # 4️⃣ Kiểm tra dị vật
             if count_di_vat > 0:
                 loi_list.append(f"Dị vật: {count_di_vat} chỗ")
 
-            # Phán định cuối cùng
+            # 2️⃣ Phán định cuối cùng: Chỉ cần thấy vỉ và không có lỗi vật lý là đạt
             if loi_list:
                 status_text = f"LỖI VỈ: {' | '.join(loi_list).upper()}"
                 result_code  = "NG - " + " | ".join(loi_list)
                 is_error = True
-                details = (
-                    [f"Vỉ chuẩn: {SO_VIEN_CHUAN_VI} viên | Phát hiện: {so_slot_phat_hien} viên"]
-                    + [f"  • {l}" for l in loi_list]
-                )
-            else:
-                status_text = f"VỈ THUỐC ĐẠT CHUẨN ({SO_VIEN_CHUAN_VI}/{SO_VIEN_CHUAN_VI} viên)"
+                details = [f"Phát hiện vỉ có lỗi: {len(loi_list)} loại lỗi"] + [f"  • {l}" for l in loi_list]
+            elif count_vi_thuoc > 0:
+                status_text = "VỈ THUỐC ĐẠT CHUẨN"
                 result_code  = "SẢN PHẨM OK"
                 is_error = False
                 num_ok = 1 # Đánh dấu 1 vỉ OK
-                details = [f"Đủ {SO_VIEN_CHUAN_VI} viên, không phát hiện lỗi"]
+                details = ["Vỉ thuốc đầy đủ, không phát hiện lỗi"]
+            else:
+                status_text = "Không thấy vỉ thuốc"
+                result_code = "CHỜ VẬT THỂ"
+                is_error = False
+                details = ["Đang quét vùng trống..."]
         else:
             if num_ng > 0:
                 status_text = f"PHÁT HIỆN: {', '.join(loi_hien_thi).upper()}"

@@ -85,14 +85,20 @@ def get_stats():
         vi_total, vi_ok, vi_ng = cur.fetchone()
 
         # 3. Phân tích loại lỗi
-        error_types = {"Dị vật": 0, "Vỡ": 0, "Thiếu viên": 0}
-        cur.execute("SELECT result FROM inspections WHERE is_ng = true")
+        error_types = {"Dị vật": 0, "Vỡ/Nứt": 0, "Thiếu viên": 0, "Khác": 0}
+        cur.execute("SELECT result, product_name FROM inspections WHERE is_ng = true")
         rows_ng = cur.fetchall()
-        for r in rows_ng:
-            res_txt = r[0].lower() if r[0] else ""
-            if "di vat" in res_txt: error_types["Dị vật"] += 1
-            elif "vo" in res_txt or "nut" in res_txt: error_types["Vỡ"] += 1
-            elif "thieu" in res_txt: error_types["Thiếu viên"] += 1
+        for r, p_name in rows_ng:
+            res_txt = r.lower() if r else ""
+            # Phân loại dựa trên từ khóa (chấp nhận cả có dấu và không dấu, underscore)
+            if any(k in res_txt for k in ["di vat", "dị vật", "di_vat"]):
+                error_types["Dị vật"] += 1
+            elif any(k in res_txt for k in ["vo", "vỡ", "nut", "nứt"]):
+                error_types["Vỡ/Nứt"] += 1
+            elif any(k in res_txt for k in ["thieu", "thiếu", "bi cat", "bị cắt"]):
+                error_types["Thiếu viên"] += 1
+            else:
+                error_types["Khác"] += 1
 
         # 4. Nhật ký gần nhất
         # Kiểm tra xem cột image_url có tồn tại không trước khi truy vấn
@@ -150,6 +156,8 @@ def get_stats():
             "total": vien_total + vi_total, 
             "ok": vien_ok + vi_ok, 
             "ng": vien_ng + vi_ng,
+            "total_vien": vien_total,
+            "total_vi": vi_total,
             "vien_stats": {"total": vien_total, "ok": vien_ok, "ng": vien_ng, "hourly": vien_hourly},
             "vi_stats": {"total": vi_total, "ok": vi_ok, "ng": vi_ng, "hourly": vi_hourly},
             "status": "RUNNING" if machine_running else "STOPPED",

@@ -306,15 +306,22 @@ export default function StickyDashboard() {
             </CardHeader>
             <CardBody className="px-6 py-8 flex flex-row items-center gap-8">
               {/* LEFT: CHART */}
-              <div className="w-1/2 h-44">
-                <Doughnut data={{
-                  labels: Object.keys(data.error_types),
-                  datasets: [{
-                    data: Object.values(data.error_types),
-                    backgroundColor: ['#f5a524', '#f31260', '#9353d3'],
-                    borderWidth: 0,
-                  }]
-                }} options={{ cutout: '75%', plugins: { legend: { display: false } } }} />
+              <div className="w-1/2 h-44 relative flex items-center justify-center">
+                {Object.values(data.error_types).every(v => v === 0) ? (
+                  <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                    <div className="w-24 h-24 rounded-full border-4 border-default-100 border-dashed animate-[spin_10s_linear_infinite]" />
+                    <span className="absolute text-[10px] font-black text-default-400 uppercase tracking-tighter">NO ERRORS</span>
+                  </div>
+                ) : (
+                  <Doughnut data={{
+                    labels: Object.keys(data.error_types),
+                    datasets: [{
+                      data: Object.values(data.error_types),
+                      backgroundColor: ['#f5a524', '#f31260', '#9353d3', '#3b82f6'],
+                      borderWidth: 0,
+                    }]
+                  }} options={{ cutout: '75%', plugins: { legend: { display: false } } }} />
+                )}
               </div>
 
               {/* RIGHT: TEXT LIST */}
@@ -322,7 +329,7 @@ export default function StickyDashboard() {
                 {Object.entries(data.error_types).map(([key, val], idx) => (
                   <div key={key} className="flex flex-col gap-1 p-2.5 bg-default-100/30 rounded-xl border border-default-100/50">
                     <div className="flex items-center gap-2">
-                      <div className={`w-2 h-2 rounded-full ${idx === 0 ? 'bg-warning' : idx === 1 ? 'bg-danger' : 'bg-secondary'}`} />
+                      <div className={`w-2 h-2 rounded-full ${idx === 0 ? 'bg-warning' : idx === 1 ? 'bg-danger' : idx === 2 ? 'bg-secondary' : 'bg-primary'}`} />
                       <span className="text-[9px] text-default-400 font-black uppercase tracking-tighter">{key}</span>
                     </div>
                     <div className="flex items-baseline gap-1 ml-4">
