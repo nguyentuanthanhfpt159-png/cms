@@ -391,7 +391,7 @@ export default function StickyDashboard() {
                       <TableCell>
                         <div className="flex flex-col gap-0.5">
                           <span className="font-black text-default-700">{log[1]}</span>
-                          <span className="text-[10px] text-default-400 font-bold">MODEL-ID: {data.current_model === 1 ? 'V-RI-01' : 'V-TH-02'}</span>
+                          <span className="text-[10px] text-default-400 font-bold">MODEL-ID: {data.current_model_id === 1 ? 'V-RI-01' : 'V-TH-02'}</span>
                         </div>
                       </TableCell>
                       <TableCell>
