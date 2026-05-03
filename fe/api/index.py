@@ -17,6 +17,7 @@ def export_all():
     if not DB_URL:
         return "Chưa cấu hình Database", 500
 
+    try:
         conn = psycopg2.connect(DB_URL)
         cur = conn.cursor()
         cur.execute("SET TIME ZONE 'Asia/Ho_Chi_Minh';")
@@ -41,7 +42,6 @@ def export_all():
         
         output = make_response(si.getvalue())
         output.headers["Content-Disposition"] = f"attachment; filename=Bao_cao_Pharma_Full_{datetime.now().strftime('%Y%m%d')}.csv"
-
         output.headers["Content-type"] = "text/csv; charset=utf-8"
         
         cur.close()
