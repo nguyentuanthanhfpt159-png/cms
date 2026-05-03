@@ -271,24 +271,23 @@ export default function StickyDashboard() {
           />
           <MetricCard 
             title={`Tổng ${data.current_model}`} 
-            value={data.total.toLocaleString()} 
+            value={data.current_model_id === 1 ? `${data.total_vien.toLocaleString()} Viên` : `${data.total_vi.toLocaleString()} Vỉ`} 
             icon={<Box size={24} />} 
             color="secondary" 
-            description={`Tổng quát: Viên(${data.total_vien}) | Vỉ(${data.total_vi})`} 
           />
           <MetricCard 
             title={`${data.current_model} Đạt`} 
-            value={data.ok.toLocaleString()} 
+            value={`${data.ok.toLocaleString()} ${data.current_model_id === 1 ? 'Viên' : 'Vỉ'}`} 
             icon={<CheckCircle2 size={24} />} 
             color="success" 
-            description={`Tỷ lệ đạt: ${((data.ok / data.total) * 100 || 0).toFixed(1)}%`} 
+            description={`Tỷ lệ đạt: ${((data.ok / (data.current_model_id === 1 ? data.total_vien : data.total_vi)) * 100 || 0).toFixed(1)}%`} 
           />
           <MetricCard 
             title={`${data.current_model} Lỗi`} 
-            value={data.ng.toLocaleString()} 
+            value={`${data.ng.toLocaleString()} ${data.current_model_id === 1 ? 'Viên' : 'Vỉ'}`} 
             icon={<AlertCircle size={24} />} 
             color="danger" 
-            description={`Tỷ lệ lỗi: ${((data.ng / data.total) * 100 || 0).toFixed(1)}%`} 
+            description={`Tỷ lệ lỗi: ${((data.ng / (data.current_model_id === 1 ? data.total_vien : data.total_vi)) * 100 || 0).toFixed(1)}%`} 
           />
         </div>
 
@@ -539,7 +538,7 @@ function ConnectionChip({ label, online }: { label: string; online: boolean }) {
 }
 
 
-function MetricCard({ title, value, icon, color, description }: { title: string; value: string; icon: React.ReactNode; color: any; description: string }) {
+function MetricCard({ title, value, icon, color, description }: { title: string; value: string; icon: React.ReactNode; color: any; description?: string }) {
   const colorMap: any = {
     primary: "text-primary bg-primary-50 border-primary-100",
     secondary: "text-secondary bg-secondary-50 border-secondary-100",
@@ -556,7 +555,7 @@ function MetricCard({ title, value, icon, color, description }: { title: string;
         <div className="flex flex-col">
           <p className="text-xs font-black text-default-500 uppercase tracking-widest mb-1">{title}</p>
           <p className="text-2xl font-black leading-none mb-2">{value}</p>
-          <p className="text-[10px] text-default-400 font-bold italic">{description}</p>
+          {description && <p className="text-[10px] text-default-400 font-bold italic">{description}</p>}
         </div>
       </CardBody>
     </Card>

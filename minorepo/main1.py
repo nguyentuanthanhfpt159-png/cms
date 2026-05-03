@@ -415,8 +415,8 @@ class App:
                 # Thử cập nhật thêm các cột số lượng nếu có trong bảng system_status
                 cur.execute("""
                     INSERT INTO system_status (id, plc_online, machine_running, cam_online, last_update,
-                                             vien_ok, vien_ng, vi_ok, vi_ng)
-                    VALUES (1, %s, %s, %s, NOW(), %s, %s, %s, %s)
+                                             vien_ok, vien_ng, vi_ok, vi_ng, current_model_id)
+                    VALUES (1, %s, %s, %s, NOW(), %s, %s, %s, %s, %s)
                     ON CONFLICT (id) DO UPDATE SET 
                         plc_online = EXCLUDED.plc_online,
                         machine_running = EXCLUDED.machine_running,
@@ -425,9 +425,11 @@ class App:
                         vien_ok = EXCLUDED.vien_ok,
                         vien_ng = EXCLUDED.vien_ng,
                         vi_ok = EXCLUDED.vi_ok,
-                        vi_ng = EXCLUDED.vi_ng;
+                        vi_ng = EXCLUDED.vi_ng,
+                        current_model_id = EXCLUDED.current_model_id;
                 """, (plc_online, machine_running, getattr(self, 'cam_connected', False), 
-                       self.vien_ok, self.vien_ng, self.vi_ok, self.vi_ng))
+                       self.vien_ok, self.vien_ng, self.vi_ok, self.vi_ng,
+                       1 if self.current_product == "Viên rời" else 2))
                 conn.commit()
                 cur.close()
                 conn.close()
@@ -438,14 +440,16 @@ class App:
                     cur = conn.cursor()
                     cur.execute("SET TIME ZONE 'Asia/Ho_Chi_Minh';")
                     cur.execute("""
-                        INSERT INTO system_status (id, plc_online, machine_running, cam_online, last_update)
-                        VALUES (1, %s, %s, %s, NOW())
+                        INSERT INTO system_status (id, plc_online, machine_running, cam_online, last_update, current_model_id)
+                        VALUES (1, %s, %s, %s, NOW(), %s)
                         ON CONFLICT (id) DO UPDATE SET 
                             plc_online = EXCLUDED.plc_online,
                             machine_running = EXCLUDED.machine_running,
                             cam_online = EXCLUDED.cam_online,
-                            last_update = EXCLUDED.last_update;
-                    """, (plc_online, machine_running, getattr(self, 'cam_connected', False)))
+                            last_update = EXCLUDED.last_update,
+                            current_model_id = EXCLUDED.current_model_id;
+                    """, (plc_online, machine_running, getattr(self, 'cam_connected', False),
+                           1 if self.current_product == "Viên rời" else 2))
                     conn.commit()
                     cur.close()
                     conn.close()
