@@ -47,10 +47,11 @@ interface Stats {
   status: string;
   plc_connected: boolean;
   cam_connected: boolean;
-  current_model: number;
+  current_model: string;
+  current_model_id: number;
   last_sync: string;
   error_types: Record<string, number>;
-  recent_logs: [string, string, string, string][];
+  recent_logs: [string, string, string, string, string][];
   hourly_data: number[];
   hourly_labels: string[];
 }
@@ -89,9 +90,12 @@ export default function Dashboard() {
     }
   };
 
-  if (!data) return (
-    <div className="flex h-screen items-center justify-center bg-[#0b0f19]">
+  if (!data || (data as any).status === "error") return (
+    <div className="flex h-screen flex-col items-center justify-center bg-[#0b0f19] text-slate-400 gap-4">
       <RefreshCw className="h-12 w-12 animate-spin text-blue-500" />
+      {(data as any)?.status === "error" && (
+        <div className="text-rose-400 font-medium">Lỗi: {(data as any).message}</div>
+      )}
     </div>
   );
 
@@ -100,7 +104,7 @@ export default function Dashboard() {
     datasets: [
       {
         label: 'Sản lượng',
-        data: data.hourly_data || [0, 0, 0, 0, 0, 0, 0, 0],
+        data: (data as any).hourly_data || (data as any).vien_stats?.hourly || [0, 0, 0, 0, 0, 0, 0, 0],
         borderColor: '#3b82f6',
         backgroundColor: 'rgba(59, 130, 246, 0.1)',
         fill: true,
@@ -112,10 +116,10 @@ export default function Dashboard() {
   };
 
   const doughnutData = {
-    labels: Object.keys(data.error_types),
+    labels: data.error_types ? Object.keys(data.error_types) : [],
     datasets: [
       {
-        data: Object.values(data.error_types),
+        data: data.error_types ? Object.values(data.error_types) : [],
         backgroundColor: ['#f59e0b', '#ef4444', '#8b5cf6'],
         borderWidth: 0,
         hoverOffset: 10,
@@ -156,13 +160,13 @@ export default function Dashboard() {
       {/* CONTROL & MODEL SELECTION */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <ModelButton 
-          active={data.current_model === 1} 
+          active={data.current_model_id === 1} 
           onClick={() => setModel(1)}
           title="Model: Viên rời"
           icon="📦"
         />
         <ModelButton 
-          active={data.current_model === 2} 
+          active={data.current_model_id === 2} 
           onClick={() => setModel(2)}
           title="Model: Vỉ thuốc"
           icon="💊"
@@ -255,10 +259,10 @@ export default function Dashboard() {
                 </tr>
               </thead>
               <tbody className="text-sm">
-                {data.recent_logs.map((log, idx) => (
+                {data.recent_logs?.map((log, idx) => (
                   <tr key={idx} className="border-b border-white/5 hover:bg-white/5 transition-colors">
                     <td className="py-3 px-2 text-slate-300">{log[1]}</td>
-                    <td className={`py-3 px-2 font-bold ${log[2].includes('NG') || log[2].includes('LỖI') ? 'text-rose-400' : 'text-emerald-400'}`}>
+                    <td className={`py-3 px-2 font-bold ${log[2]?.includes('NG') || log[2]?.includes('LỖI') ? 'text-rose-400' : 'text-emerald-400'}`}>
                       {log[2]}
                     </td>
                     <td className="py-3 px-2 text-right text-slate-500 tabular-nums">{log[3]}</td>

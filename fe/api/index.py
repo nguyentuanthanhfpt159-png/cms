@@ -137,7 +137,8 @@ def get_stats():
         hourly_labels = [r[0] for r in cur.fetchall()]
         
         vien_hourly = get_hourly_stats("Viên rời")
-        vi_hourly = get_hourly_stats("Vỉ thuốc")
+        # Tự động chọn hourly_data theo model hiện tại để biểu đồ chính hiển thị
+        hourly_data = vien_hourly if current_model == 1 else vi_hourly
 
         cur.close()
         conn.close()
@@ -156,12 +157,14 @@ def get_stats():
             "last_sync": last_update,
             "recent_logs": recent_logs,
             "error_types": error_types,
-            "hourly_labels": hourly_labels
+            "hourly_labels": hourly_labels,
+            "hourly_data": hourly_data
         })
 
     except Exception as e:
         if 'conn' in locals() and conn:
             conn.close()
+        print(f"API Error: {e}")
         return jsonify({"status": "error", "message": str(e)})
 
 @app.route('/api/set_model/<int:model_id>')
