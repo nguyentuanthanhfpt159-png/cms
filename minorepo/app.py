@@ -25,16 +25,38 @@ def get_stats():
         plc_connected, machine_running, cam_online, current_model, last_update = False, False, False, 1, "--:--:--"
         if row_st:
             plc_connected, machine_running_db, cam_online, current_model, last_update_dt = row_st
-            last_update = last_update_dt.strftime('%H:%M:%S')
-            machine_running = machine_running_db
+            
+            # KIỂM TRA HEARTBEAT: Nếu dữ liệu cũ quá 15 giây thì coi như hệ thống OFFLINE
+            # Lấy thời gian hiện tại (phải cùng múi giờ với DB)
+            cur.execute("SELECT NOW()")
+            db_now = cur.fetchone()[0]
+            
+            diff = (db_now - last_update_dt).total_seconds()
+            if diff > 15:
+                plc_connected = False
+                cam_online = False
+                machine_running = False
+                last_update = "MẤT KẾT NỐI"
+            else:
+                last_update = last_update_dt.strftime('%H:%M:%S')
+                machine_running = machine_running_db
 
-        # 2. Thống kê sản lượng
-        cur.execute("SELECT COUNT(*), COUNT(*) FILTER (WHERE is_ng = false), COUNT(*) FILTER (WHERE is_ng = true) FROM inspections")
+        # Tên sản phẩm tương ứng với ID
+        target_product = "Viên rời" if current_model == 1 else "Vỉ thuốc"
+
+        # 2. Thống kê sản lượng (Lọc theo sản phẩm hiện tại)
+        cur.execute("""
+            SELECT COUNT(*), 
+                   COUNT(*) FILTER (WHERE is_ng = false), 
+                   COUNT(*) FILTER (WHERE is_ng = true) 
+            FROM inspections 
+            WHERE product_name = %s
+        """, (target_product,))
         total, ok, ng = cur.fetchone()
 
-        # 3. Phân tích loại lỗi
+        # 3. Phân tích loại lỗi (Lọc theo sản phẩm hiện tại)
         error_types = {"Dị vật": 0, "Vỡ": 0, "Thiếu viên": 0}
-        cur.execute("SELECT result FROM inspections WHERE is_ng = true")
+        cur.execute("SELECT result FROM inspections WHERE is_ng = true AND product_name = %s", (target_product,))
         rows_ng = cur.fetchall()
         for r in rows_ng:
             res_txt = r[0].lower()
@@ -42,20 +64,35 @@ def get_stats():
             elif "vo" in res_txt or "nut" in res_txt: error_types["Vỡ"] += 1
             elif "thieu" in res_txt: error_types["Thiếu viên"] += 1
 
-        # 4. Nhật ký gần nhất
-        cur.execute("SELECT id, product_name, result, created_at FROM inspections ORDER BY created_at DESC LIMIT 10")
+        # 4. Nhật ký gần nhất (Lọc theo sản phẩm hiện tại)
+        cur.execute("""
+            SELECT id, product_name, result, created_at, image_url 
+            FROM inspections 
+            WHERE product_name = %s 
+            ORDER BY created_at DESC LIMIT 10
+        """, (target_product,))
         rows_logs = cur.fetchall()
-        recent_logs = [[str(r[0]), r[1], r[2], r[3].strftime('%H:%M:%S')] for r in rows_logs]
+        # image_url là cột thứ 4 (index 4)
+        recent_logs = [[str(r[0]), r[1], r[2], r[3].strftime('%H:%M:%S'), r[4]] for r in rows_logs]
+
+        # 5. Tổng số lượng từng loại (để hiển thị ở chú thích)
+        cur.execute("SELECT COUNT(*) FROM inspections WHERE product_name = 'Viên rời'")
+        total_vien = cur.fetchone()[0]
+        cur.execute("SELECT COUNT(*) FROM inspections WHERE product_name = 'Vỉ thuốc'")
+        total_vi = cur.fetchone()[0]
 
         cur.close()
         conn.close()
 
         return jsonify({
             "total": total, "ok": ok, "ng": ng,
+            "total_vien": total_vien,
+            "total_vi": total_vi,
             "status": "RUNNING" if machine_running else "STOPPED",
             "plc_connected": plc_connected,
             "cam_connected": cam_online,
-            "current_model": current_model,
+            "current_model": target_product,
+            "current_model_id": current_model,
             "last_sync": last_update,
             "recent_logs": recent_logs,
             "error_types": error_types,

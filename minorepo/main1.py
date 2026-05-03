@@ -106,6 +106,8 @@ class CameraStream:
                 if self.cap.isOpened():
                     # grab() chỉ đẩy khung hình vào hàng đợi, cực nhanh và giúp xả buffer
                     if not self.cap.grab():
+                        self.real_online = False
+                        self.ret = False
                         time.sleep(0.1)
                         continue
                         
@@ -128,7 +130,12 @@ class CameraStream:
                             
                         self.ret = self.real_online
                         self.frame = frame
+                    else:
+                        self.real_online = False
+                        self.ret = False
                 else:
+                    self.real_online = False
+                    self.ret = False
                     time.sleep(1.0)
                     self.cap = cv2.VideoCapture(CAM_SOURCE)
             except:
@@ -195,7 +202,6 @@ class App:
         self.is_paused = False
         self.is_processing = False
         self.last_sensor_state = False
-        self.plc_connected = False
         self.last_remote_change_time = 0 # Thời điểm cuối cùng đổi model từ Web
 
 
@@ -363,7 +369,11 @@ class App:
                             logic.send_product_id_to_plc(expected_id)
                 
                 # --- GHI TRẠNG THÁI HỆ THỐNG CHO WEB DASHBOARD & PLC ---
-                self.write_status_to_json(self.plc_connected, system_active)
+                # Chỉ đẩy lên Supabase mỗi 2 giây để tránh quá tải thread
+                if not hasattr(self, 'last_supabase_update') or time.time() - self.last_supabase_update > 2:
+                    self.write_status_to_json(self.plc_connected, system_active)
+                    self.last_supabase_update = time.time()
+                
                 logic.send_camera_status_to_plc(getattr(self, 'cam_connected', False))
 
             except Exception as e:
@@ -371,8 +381,9 @@ class App:
                 logic.disconnect_plc()
                 self.lbl_plc_status.config(text="PLC: MẤT KẾT NỐI", fg=COLOR_RED)
                 self.write_status_to_json(False, False)
+                self.last_supabase_update = time.time()
             
-            time.sleep(0.05)
+            time.sleep(0.1)
 
     def write_status_to_json(self, plc_status, machine_status):
         try:
@@ -488,22 +499,22 @@ class App:
         self.frame_right.pack(side="right", fill="y", padx=10, pady=10)
         self.frame_right.pack_propagate(False)
 
-        tk.Label(self.frame_left, text="HỆ THỐNG AI PHÂN LOẠI DƯỢC PHẨM", font=self.font_title, bg=COLOR_BG).pack(pady=10)
+        tk.Label(self.frame_left, text="HỆ THỐNG PHÂN LOẠI DƯỢC PHẨM", font=self.font_title, bg=COLOR_BG).pack(pady=10)
         recipe_frame = tk.LabelFrame(self.frame_left, text=" CÔNG THỨC SẢN PHẨM ", font=self.font_header, bg=COLOR_BG, fg=COLOR_BLUE)
         recipe_frame.pack(pady=10, fill="x", padx=50)
-        tk.Label(recipe_frame, text="Chọn sản phẩm:", font=self.font_body, bg=COLOR_BG).pack(side="left", padx=20, pady=15)
-        self.combo_product = ttk.Combobox(recipe_frame, values=list(MODELS_CONFIG.keys()), font=self.font_body, state="readonly", width=25)
-        self.combo_product.set(self.current_product)
-        self.combo_product.pack(side="left", padx=10)
-        self.combo_product.bind("<<ComboboxSelected>>", self.on_product_change)
+        # tk.Label(recipe_frame, text="Chọn sản phẩm:", font=self.font_body, bg=COLOR_BG).pack(side="left", padx=20, pady=15)
+        # self.combo_product = ttk.Combobox(recipe_frame, values=list(MODELS_CONFIG.keys()), font=self.font_body, state="readonly", width=25)
+        # self.combo_product.set(self.current_product)
+        # self.combo_product.pack(side="left", padx=10)
+        # self.combo_product.bind("<<ComboboxSelected>>", self.on_product_change)
 
         self.lbl_webcam = tk.Label(self.frame_left, bg="black", width=800, height=600)
         self.lbl_webcam.pack()
 
-        frame_btn = tk.Frame(self.frame_left, bg=COLOR_BG)
-        frame_btn.pack(pady=20)
-        tk.Button(frame_btn, text="KIỂM TRA NGAY", bg=COLOR_BLUE, fg="white", font=("Arial",14,"bold"), width=18, height=2, command=self.action_manual_check).pack(side="left", padx=10)
-        tk.Button(frame_btn, text="XEM LỊCH SỬ (.CSV)", bg="#FFA500", fg="white", font=("Arial",14,"bold"), width=18, height=2, command=self.open_excel_file).pack(side="left", padx=10)
+        # frame_btn = tk.Frame(self.frame_left, bg=COLOR_BG)
+        # frame_btn.pack(pady=20)
+        # tk.Button(frame_btn, text="KIỂM TRA NGAY", bg=COLOR_BLUE, fg="white", font=("Arial",14,"bold"), width=18, height=2, command=self.action_manual_check).pack(side="left", padx=10)
+        # tk.Button(frame_btn, text="XEM LỊCH SỬ (.CSV)", bg="#FFA500", fg="white", font=("Arial",14,"bold"), width=18, height=2, command=self.open_excel_file).pack(side="left", padx=10)
 
         tk.Label(self.frame_right, text="KẾT QUẢ PHÂN TÍCH AI", font=self.font_header, bg=COLOR_FRAME).pack(pady=10)
         self.lbl_result_image = tk.Label(self.frame_right, bg="gray", width=400, height=300)
