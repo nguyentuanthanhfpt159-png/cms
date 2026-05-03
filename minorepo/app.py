@@ -41,22 +41,32 @@ def get_stats():
                 last_update = last_update_dt.strftime('%H:%M:%S')
                 machine_running = machine_running_db
 
-        # Tên sản phẩm tương ứng với ID
-        target_product = "Viên rời" if current_model == 1 else "Vỉ thuốc"
+        # Tên sản phẩm tương ứng với ID (Đảm bảo ép kiểu int)
+        try:
+            cur_id = int(current_model)
+        except:
+            cur_id = 1
+            
+        target_product = "Viên rời" if cur_id == 1 else "Vỉ thuốc"
 
-        # 2. Thống kê sản lượng (Lọc theo sản phẩm hiện tại)
+        # 2. Thống kê sản lượng (Lọc theo sản phẩm hiện tại - dùng TRIM để an toàn)
         cur.execute("""
             SELECT COUNT(*), 
                    COUNT(*) FILTER (WHERE is_ng = false), 
                    COUNT(*) FILTER (WHERE is_ng = true) 
             FROM inspections 
-            WHERE product_name = %s
+            WHERE TRIM(product_name) = %s
         """, (target_product,))
         total, ok, ng = cur.fetchone()
+        
+        # Nếu không có dữ liệu, gán mặc định 0
+        total = total or 0
+        ok = ok or 0
+        ng = ng or 0
 
         # 3. Phân tích loại lỗi (Lọc theo sản phẩm hiện tại)
         error_types = {"Dị vật": 0, "Vỡ": 0, "Thiếu viên": 0}
-        cur.execute("SELECT result FROM inspections WHERE is_ng = true AND product_name = %s", (target_product,))
+        cur.execute("SELECT result FROM inspections WHERE is_ng = true AND TRIM(product_name) = %s", (target_product,))
         rows_ng = cur.fetchall()
         for r in rows_ng:
             res_txt = r[0].lower()
@@ -68,7 +78,7 @@ def get_stats():
         cur.execute("""
             SELECT id, product_name, result, created_at, image_url 
             FROM inspections 
-            WHERE product_name = %s 
+            WHERE TRIM(product_name) = %s 
             ORDER BY created_at DESC LIMIT 10
         """, (target_product,))
         rows_logs = cur.fetchall()
