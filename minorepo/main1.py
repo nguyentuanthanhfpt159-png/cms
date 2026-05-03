@@ -351,13 +351,12 @@ class App:
                     rising_edge = (current_sensor == True and self.last_sensor_state == False)
                     if rising_edge:
                         if not self.is_processing:
+                            self.is_processing = True # Khóa ngay lập tức để tránh trigger trùng trong lúc chờ delay
                             print(f">>> CẢM BIẾN KÍCH HOẠT (Bit 0.1)! Bắt đầu kiểm tra mẫu: {self.current_product}", flush=True)
                             delay = CAPTURE_DELAY_VI if self.current_product == "Vỉ thuốc" else CAPTURE_DELAY_VIEN
                             
-                            # Xử lý delay
-                            if delay > 0: time.sleep(delay)
-                            
-                            self.root.after(0, self.perform_check)
+                            # Xử lý delay không chặn luồng (Non-blocking delay)
+                            self.root.after(int(delay * 1000), self.perform_check)
                     self.last_sensor_state = current_sensor
 
                     # Kiểm tra lệnh đổi model từ PLC (Chỉ để log và ép PLC theo Web)
@@ -478,7 +477,7 @@ class App:
             print(f"Lỗi Upload: {e}", flush=True)
         return None
 
-    def push_inspection_to_supabase(self, product, result, is_ng, details, image_url=None):
+    def push_inspection_to_supabase(self, product, result, is_ng, details, num_ok=0, num_ng=0, image_url=None):
         if not DB_URL or "MAT_KHAU" in DB_URL: return
         def run():
             try:
@@ -486,9 +485,9 @@ class App:
                 cur = conn.cursor()
                 cur.execute("SET TIME ZONE 'Asia/Ho_Chi_Minh';")
                 cur.execute("""
-                    INSERT INTO inspections (product_name, result, is_ng, details, image_url, created_at)
-                    VALUES (%s, %s, %s, %s, %s, NOW());
-                """, (product, result, is_ng, " | ".join(details), image_url))
+                    INSERT INTO inspections (product_name, result, is_ng, details, num_ok, num_ng, image_url, created_at)
+                    VALUES (%s, %s, %s, %s, %s, %s, %s, NOW());
+                """, (product, result, is_ng, " | ".join(details), num_ok, num_ng, image_url))
                 conn.commit()
                 cur.close()
                 conn.close()
@@ -540,8 +539,9 @@ class App:
         return cv2.Laplacian(cv2.cvtColor(image, cv2.COLOR_BGR2GRAY), cv2.CV_64F).var()
 
     def perform_check(self):
-        if self.current_frame is None: return
-        self.is_processing = True
+        if self.current_frame is None: 
+            self.is_processing = False # Giải phóng nếu không có frame
+            return
         self.is_paused = True 
         ret, f = self.vs.read()
         if not ret: 
@@ -590,14 +590,14 @@ class App:
             # ĐẨY KẾT QUẢ LÊN SUPABASE (Sẽ đẩy sau khi có ảnh ở finish_check_ui)
             # self.push_inspection_to_supabase(self.current_product, conclusion, is_ng, details)
 
-            self.root.after(0, lambda: self.finish_check_ui(annotated, info, conclusion, is_ng, details, timestamp))
+            self.root.after(0, lambda: self.finish_check_ui(annotated, info, conclusion, is_ng, details, timestamp, n_ok, n_ng))
         except Exception as e:
             print(f"Lỗi xử lý: {e}", flush=True)
             self.root.after(0, self.reset_system)
         finally:
             if os.path.exists(temp_path): os.remove(temp_path)
 
-    def finish_check_ui(self, annotated, info, conclusion, is_ng, details, timestamp):
+    def finish_check_ui(self, annotated, info, conclusion, is_ng, details, timestamp, n_ok, n_ng):
         fg_color = COLOR_RED if is_ng else COLOR_GREEN
         self.lbl_info.config(text=info, fg=fg_color)
         self.lbl_status.config(text=conclusion, fg=fg_color)
@@ -620,7 +620,7 @@ class App:
             def upload_task():
                 img_url = self.upload_to_supabase_storage(local_path, file_name)
                 # Sau khi có URL, mới đẩy data lên Database
-                self.push_inspection_to_supabase(self.current_product, conclusion, is_ng, details, img_url)
+                self.push_inspection_to_supabase(self.current_product, conclusion, is_ng, details, n_ok, n_ng, img_url)
             
             threading.Thread(target=upload_task, daemon=True).start()
         

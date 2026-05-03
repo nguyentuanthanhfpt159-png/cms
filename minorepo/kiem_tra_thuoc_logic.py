@@ -384,15 +384,17 @@ def process_frame(frame, model, class_names, conf_threshold=None):
                 is_error = False
                 details = ["Đang quét vùng trống..."]
         else:
+            total_pills = num_ok + num_ng
             if num_ng > 0:
-                status_text = f"PHÁT HIỆN: {', '.join(loi_hien_thi).upper()}"
-                result_code  = f"NG ({num_ng} LỖI)"
+                labels_str = ", ".join(loi_hien_thi)
+                status_text = f"PHÁT HIỆN: {num_ng}/{total_pills} LỖI ({labels_str.upper()})"
+                result_code  = f"NG ({num_ng}/{total_pills} VIÊN) - {labels_str}"
                 is_error = True
             else:
-                status_text = f"ĐẠT: {num_ok} VIÊN THUỐC"
-                result_code  = "SẢN PHẨM OK"
+                status_text = f"ĐẠT: {num_ok}/{total_pills} VIÊN"
+                result_code  = f"OK ({num_ok} VIÊN)"
                 is_error = False
-            details = [f"OK: {num_ok}", f"Lỗi: {num_ng} ({', '.join(loi_hien_thi)})"]
+            details = [f"Tổng số: {total_pills}", f"Đạt: {num_ok}", f"Lỗi: {num_ng} ({', '.join(loi_hien_thi)})"]
 
     # --- GHI CHÚ: Tín hiệu PLC được điều khiển từ main1.py để đảm bảo tính đồng bộ dữ liệu tổng ---
     # is_ok_pulse = not is_error
