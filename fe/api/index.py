@@ -94,7 +94,12 @@ def get_stats():
         # Lấy counter NG thực tế từ system_status
         current_ng_total = ss_vien_ng if current_model == 1 else ss_vi_ng
         
-        error_types = {"Dị vật": 0, "Vỡ/Nứt": 0, "Thiếu viên": 0, "Khác": 0}
+        # Khởi tạo các loại lỗi tùy theo Model (Viên rời chỉ có Dị vật và Vỡ/Nứt)
+        if current_model == 1:
+            error_types = {"Dị vật": 0, "Vỡ/Nứt": 0, "Khác": 0}
+        else:
+            error_types = {"Dị vật": 0, "Vỡ/Nứt": 0, "Thiếu viên": 0, "Khác": 0}
+
         cur.execute("SELECT result, details FROM inspections WHERE is_ng = true AND product_name = %s", (current_model_name,))
         rows_ng = cur.fetchall()
         
@@ -103,13 +108,13 @@ def get_stats():
             # Gộp cả result và details để tìm từ khóa cho chính xác
             search_txt = f"{r} {d}".lower() if (r or d) else ""
             
-            if any(k in search_txt for k in ["di vat", "dị vật", "di_vat"]):
+            if any(k in search_txt for k in ["di vat", "dị vật", "di_vat", "vat the la"]):
                 error_types["Dị vật"] += 1
                 known_count += 1
-            elif any(k in search_txt for k in ["vo", "vỡ", "nut", "nứt"]):
+            elif any(k in search_txt for k in ["vo", "vỡ", "nut", "nứt", "hong", "hỏng"]):
                 error_types["Vỡ/Nứt"] += 1
                 known_count += 1
-            elif any(k in search_txt for k in ["thieu", "thiếu", "bi cat", "bị cắt"]):
+            elif current_model == 2 and any(k in search_txt for k in ["thieu", "thiếu", "bi cat", "bị cắt"]):
                 error_types["Thiếu viên"] += 1
                 known_count += 1
         
