@@ -91,19 +91,28 @@ def get_stats():
         vi_total = ss_vi_ok + ss_vi_ng
         
         # 3. Phân tích loại lỗi theo model hiện tại
+        # Lấy counter NG thực tế từ system_status
+        current_ng_total = ss_vien_ng if current_model == 1 else ss_vi_ng
+        
         error_types = {"Dị vật": 0, "Vỡ/Nứt": 0, "Thiếu viên": 0, "Khác": 0}
         cur.execute("SELECT result FROM inspections WHERE is_ng = true AND product_name = %s", (current_model_name,))
         rows_ng = cur.fetchall()
+        
+        known_count = 0
         for (r,) in rows_ng:
             res_txt = r.lower() if r else ""
             if any(k in res_txt for k in ["di vat", "dị vật", "di_vat"]):
                 error_types["Dị vật"] += 1
+                known_count += 1
             elif any(k in res_txt for k in ["vo", "vỡ", "nut", "nứt"]):
                 error_types["Vỡ/Nứt"] += 1
+                known_count += 1
             elif any(k in res_txt for k in ["thieu", "thiếu", "bi cat", "bị cắt"]):
                 error_types["Thiếu viên"] += 1
-            else:
-                error_types["Khác"] += 1
+                known_count += 1
+        
+        # Phần còn lại của counter (bao gồm cả các mẫu NG chưa được phân loại hoặc chưa có log chi tiết) sẽ vào mục "Khác"
+        error_types["Khác"] = max(0, current_ng_total - known_count)
 
         # 4. Nhật ký gần nhất
         cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'inspections' AND column_name = 'image_url'")
