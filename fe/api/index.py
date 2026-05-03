@@ -90,11 +90,11 @@ def get_stats():
         vien_total = ss_vien_ok + ss_vien_ng
         vi_total = ss_vi_ok + ss_vi_ng
         
-        # 3. Phân tích loại lỗi
+        # 3. Phân tích loại lỗi theo model hiện tại
         error_types = {"Dị vật": 0, "Vỡ/Nứt": 0, "Thiếu viên": 0, "Khác": 0}
-        cur.execute("SELECT result, product_name FROM inspections WHERE is_ng = true")
+        cur.execute("SELECT result FROM inspections WHERE is_ng = true AND product_name = %s", (current_model_name,))
         rows_ng = cur.fetchall()
-        for r, p_name in rows_ng:
+        for (r,) in rows_ng:
             res_txt = r.lower() if r else ""
             if any(k in res_txt for k in ["di vat", "dị vật", "di_vat"]):
                 error_types["Dị vật"] += 1
