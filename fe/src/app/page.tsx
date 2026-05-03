@@ -70,6 +70,8 @@ interface Stats {
   total: number;
   ok: number;
   ng: number;
+  total_vien: number;
+  total_vi: number;
   status: string;
   plc_connected: boolean;
   cam_connected: boolean;
@@ -253,7 +255,13 @@ export default function StickyDashboard() {
         {/* METRICS ROW */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           <MetricCard title="Trạng thái máy" value={data.status === "RUNNING" ? "ĐANG CHẠY" : "ĐANG DỪNG"} icon={<Activity size={24} />} color="primary" description={data.status === "RUNNING" ? "Vận hành ổn định" : "Máy đã tạm dừng"} />
-          <MetricCard title="Tổng sản lượng" value={data.total.toLocaleString()} icon={<Box size={24} />} color="secondary" description="Số mẫu đã kiểm tra" />
+          <MetricCard 
+            title="Tổng sản lượng" 
+            value={data.total.toLocaleString()} 
+            icon={<Box size={24} />} 
+            color="secondary" 
+            description={`Viên: ${data.total_vien} | Vỉ: ${data.total_vi}`} 
+          />
           <MetricCard title="Sản phẩm Đạt" value={data.ok.toLocaleString()} icon={<CheckCircle2 size={24} />} color="success" description={`Tỷ lệ: ${((data.ok / data.total) * 100 || 0).toFixed(1)}%`} />
           <MetricCard title="Sản phẩm Lỗi" value={data.ng.toLocaleString()} icon={<AlertCircle size={24} />} color="danger" description={`Tỷ lệ: ${((data.ng / data.total) * 100 || 0).toFixed(1)}%`} />
         </div>

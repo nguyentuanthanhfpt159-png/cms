@@ -16,9 +16,9 @@ def export_all():
     if not DB_URL:
         return "Chưa cấu hình Database", 500
 
-    try:
         conn = psycopg2.connect(DB_URL)
         cur = conn.cursor()
+        cur.execute("SET TIME ZONE 'Asia/Ho_Chi_Minh';")
         
         # Lấy toàn bộ dữ liệu nhật ký
         cur.execute("SELECT id, product_name, result, created_at FROM inspections ORDER BY created_at DESC")
@@ -59,6 +59,7 @@ def get_stats():
     try:
         conn = psycopg2.connect(DB_URL)
         cur = conn.cursor()
+        cur.execute("SET TIME ZONE 'Asia/Ho_Chi_Minh';")
         
         # 1. Trạng thái hệ thống
         cur.execute("SELECT plc_online, machine_running, cam_online, current_model_id, last_update FROM system_status WHERE id = 1")
@@ -69,10 +70,17 @@ def get_stats():
             plc_connected, machine_running_db, cam_online, current_model, last_update_dt = row_st
             last_update = last_update_dt.strftime('%d/%m/%Y %H:%M') if last_update_dt else "--:--:--"
             machine_running = machine_running_db
+        
+        # Mapping ID -> Name
+        mapping = {1: "Viên rời", 2: "Vỉ thuốc"}
+        current_model_name = mapping.get(current_model, "Unknown")
 
-        # 2. Thống kê sản lượng
-        cur.execute("SELECT COUNT(*), COUNT(*) FILTER (WHERE is_ng = false), COUNT(*) FILTER (WHERE is_ng = true) FROM inspections")
-        total, ok, ng = cur.fetchone()
+        # 2. Thống kê sản lượng theo loại
+        cur.execute("SELECT COUNT(*), COUNT(*) FILTER (WHERE is_ng = false), COUNT(*) FILTER (WHERE is_ng = true) FROM inspections WHERE product_name = 'Viên rời'")
+        vien_total, vien_ok, vien_ng = cur.fetchone()
+        
+        cur.execute("SELECT COUNT(*), COUNT(*) FILTER (WHERE is_ng = false), COUNT(*) FILTER (WHERE is_ng = true) FROM inspections WHERE product_name = 'Vỉ thuốc'")
+        vi_total, vi_ok, vi_ng = cur.fetchone()
 
         # 3. Phân tích loại lỗi
         error_types = {"Dị vật": 0, "Vỡ": 0, "Thiếu viên": 0}
@@ -99,39 +107,55 @@ def get_stats():
 
 
 
-        # 5. Thống kê theo giờ (8 giờ gần nhất)
+        # 5. Thống kê theo giờ (8 giờ gần nhất) - Tách riêng Viên và Vỉ
+        def get_hourly_stats(product_name):
+            cur.execute("""
+                SELECT 
+                    COUNT(i.id) as count
+                FROM (
+                    SELECT generate_series(
+                        date_trunc('hour', NOW()) - interval '7 hours',
+                        date_trunc('hour', NOW()),
+                        interval '1 hour'
+                    ) as hour
+                ) h
+                LEFT JOIN inspections i ON date_trunc('hour', i.created_at) = h.hour AND i.product_name = %s
+                GROUP BY h.hour
+                ORDER BY h.hour
+            """, (product_name,))
+            return [r[0] for r in cur.fetchall()]
+
+        # Lấy nhãn giờ (chung cho cả 2)
         cur.execute("""
-            SELECT 
-                to_char(hour, 'HH24') || 'h' as label,
-                COUNT(i.id) as count
-            FROM (
-                SELECT generate_series(
-                    date_trunc('hour', NOW()) - interval '7 hours',
-                    date_trunc('hour', NOW()),
-                    interval '1 hour'
-                ) as hour
-            ) h
-            LEFT JOIN inspections i ON date_trunc('hour', i.created_at) = h.hour
-            GROUP BY h.hour
-            ORDER BY h.hour
+            SELECT to_char(hour, 'HH24') || 'h' 
+            FROM generate_series(
+                date_trunc('hour', NOW()) - interval '7 hours',
+                date_trunc('hour', NOW()),
+                interval '1 hour'
+            ) as hour
         """)
-        hourly_rows = cur.fetchall()
-        hourly_labels = [r[0] for r in hourly_rows]
-        hourly_data = [r[1] for r in hourly_rows]
+        hourly_labels = [r[0] for r in cur.fetchall()]
+        
+        vien_hourly = get_hourly_stats("Viên rời")
+        vi_hourly = get_hourly_stats("Vỉ thuốc")
 
         cur.close()
         conn.close()
 
         return jsonify({
-            "total": total, "ok": ok, "ng": ng,
+            "total": vien_total + vi_total, 
+            "ok": vien_ok + vi_ok, 
+            "ng": vien_ng + vi_ng,
+            "vien_stats": {"total": vien_total, "ok": vien_ok, "ng": vien_ng, "hourly": vien_hourly},
+            "vi_stats": {"total": vi_total, "ok": vi_ok, "ng": vi_ng, "hourly": vi_hourly},
             "status": "RUNNING" if machine_running else "STOPPED",
             "plc_connected": plc_connected,
             "cam_connected": cam_online,
-            "current_model": current_model,
+            "current_model": current_model_name,
+            "current_model_id": current_model,
             "last_sync": last_update,
             "recent_logs": recent_logs,
             "error_types": error_types,
-            "hourly_data": hourly_data,
             "hourly_labels": hourly_labels
         })
 
@@ -147,6 +171,7 @@ def set_model(model_id):
     try:
         conn = psycopg2.connect(DB_URL)
         cur = conn.cursor()
+        cur.execute("SET TIME ZONE 'Asia/Ho_Chi_Minh';")
         cur.execute("UPDATE system_status SET current_model_id = %s WHERE id = 1", (model_id,))
         conn.commit()
         cur.close()

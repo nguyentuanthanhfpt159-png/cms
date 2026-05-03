@@ -93,10 +93,9 @@ def send_product_id_to_plc(product_id):
                 data = bytearray(2)
                 snap7.util.set_int(data, 0, product_id)
                 plc_client.db_write(DB_NUMBER, PRODUCT_ID_OFFSET, data)
-                print(f"PLC: Đã đồng bộ mã sản phẩm ID={product_id}")
+                # print(f"PLC: Đã đồng bộ mã sản phẩm ID={product_id}")
         except Exception as e:
             print(f"Lỗi gửi ProductID xuống PLC: {e}")
-            raise e
             
 def read_system_status():
     """Đọc trạng thái hệ thống (Start/Stop) từ PLC"""
@@ -111,46 +110,37 @@ def read_system_status():
             raise e
     return False
 
-def send_result_to_plc(is_error, is_ok=False, num_ok=0, num_ng=0, num_total=0):
+def send_result_to_plc(is_error, is_ok=False, num_ok=-1, num_ng=-1, num_total=-1):
     """Gửi tín hiệu và số lượng xuống PLC"""
     with plc_lock:
         try:
             if plc_client.get_connected():
-                # 1. Gửi các Bit trạng thái (Đèn, Xi lanh)
+                # 1. Gửi các Bit trạng thái (Đèn, Xi lanh) - Byte 0
                 data_bits = plc_client.db_read(DB_NUMBER, START_OFFSET, 1)
                 set_bool(data_bits, 0, BIT_OFFSET, is_error)
                 set_bool(data_bits, 0, OK_BIT_OFFSET, is_ok)
                 plc_client.db_write(DB_NUMBER, START_OFFSET, data_bits)
 
-                # 2. Gửi các con số (Số lượng viên thuốc)
-                # Gửi num_ok vào DB1.DBW2
-                ok_bytes = bytearray(2)
-                snap7.util.set_int(ok_bytes, 0, num_ok)
-                plc_client.db_write(DB_NUMBER, OK_COUNT_OFFSET, ok_bytes)
+                # 2. Gửi các con số (Word - 2 bytes mỗi số) - Bắt đầu từ Byte 2
+                if num_ok != -1:
+                    ok_bytes = bytearray(2)
+                    snap7.util.set_int(ok_bytes, 0, num_ok)
+                    plc_client.db_write(DB_NUMBER, OK_COUNT_OFFSET, ok_bytes)
 
-                # Gửi num_ng vào DB1.DBW4
-                ng_bytes = bytearray(2)
-                snap7.util.set_int(ng_bytes, 0, num_ng)
-                plc_client.db_write(DB_NUMBER, NG_COUNT_OFFSET, ng_bytes)
+                if num_ng != -1:
+                    ng_bytes = bytearray(2)
+                    snap7.util.set_int(ng_bytes, 0, num_ng)
+                    plc_client.db_write(DB_NUMBER, NG_COUNT_OFFSET, ng_bytes)
 
-                # Gửi num_total vào DB1.DBW6
-                total_bytes = bytearray(2)
-                snap7.util.set_int(total_bytes, 0, num_total)
-                plc_client.db_write(DB_NUMBER, TOTAL_COUNT_OFFSET, total_bytes)
+                if num_total != -1:
+                    total_bytes = bytearray(2)
+                    snap7.util.set_int(total_bytes, 0, num_total)
+                    plc_client.db_write(DB_NUMBER, TOTAL_COUNT_OFFSET, total_bytes)
                 
+                # print(f"PLC Sync: OK={num_ok}, NG={num_ng}, Total={num_total}")
         except Exception as e:
             print(f"Lỗi khi gửi dữ liệu xuống PLC: {e}")
 
-def send_product_id_to_plc(product_id):
-    """Gửi mã sản phẩm xuống PLC (1=Viên, 2=Vỉ)"""
-    with plc_lock:
-        try:
-            if plc_client.get_connected():
-                data = bytearray(2)
-                snap7.util.set_int(data, 0, product_id)
-                plc_client.db_write(DB_NUMBER, PRODUCT_ID_OFFSET, data)
-        except Exception as e:
-            pass
 
 def read_product_id_from_plc():
     """Đọc mã sản phẩm từ PLC (1=Viên, 2=Vỉ)"""
@@ -162,6 +152,8 @@ def read_product_id_from_plc():
         except:
             pass
     return 0
+
+
 
 def send_product_specific_counts(product_name, ok_count, ng_count):
     """
@@ -206,9 +198,9 @@ def set_conveyor_state(is_running):
                 data = plc_client.db_read(DB_NUMBER, START_OFFSET, 1)
                 set_bool(data, 0, CONVEYOR_BIT_OFFSET, is_running)
                 plc_client.db_write(DB_NUMBER, START_OFFSET, data)
-                print(f"Băng tải: {'CHẠY' if is_running else 'DỪNG'}")
+                print(f"Băng tải: {'CHẠY' if is_running else 'DỪNG'}", flush=True)
         except Exception as e:
-            print(f"Lỗi khi điều khiển băng tải: {e}")
+            print(f"Lỗi khi điều khiển băng tải: {e}", flush=True)
 
 def send_camera_status_to_plc(is_online):
     """Gửi trạng thái Camera từ PC xuống PLC để ESP32 đọc"""
@@ -273,11 +265,9 @@ VI_THUOC_NG_LABELS = {
 }
 
 # --- SỐ VIÊN CHUẨN CHO MỖI VỈ ---
-# Chỉnh số này cho đúng với vỉ thuốc thực tế của bạn
 SO_VIEN_CHUAN_VI = 10
 
-CONF_THRESHOLD = 0.5  # Hạ xuống 0.3 để nhạy hơn với các lỗi mờ/nhỏ
-
+CONF_THRESHOLD = 0.5
 def apply_static_crop(frame):
     h, w = frame.shape[:2]
     # Thu hẹp chiều ngang, Kéo dài chiều dọc (Hình chữ nhật đứng ôm theo băng tải)
@@ -296,9 +286,13 @@ def load_model(model_path):
 # ==============================
 # XỬ LÝ FRAME & KẾT NỐI LOGIC
 # ==============================
-def process_frame(frame, model, class_names):
+def process_frame(frame, model, class_names, conf_threshold=None):
+    if conf_threshold is None:
+        conf_threshold = CONF_THRESHOLD
+        
     frame_to_detect = apply_static_crop(frame)
-    results = model(frame_to_detect, imgsz=640, conf=0.25, verbose=False)
+    # Sử dụng conf_threshold truyền vào để lọc ngay từ bước detect của YOLO
+    results = model(frame_to_detect, imgsz=640, conf=conf_threshold, verbose=False)
     result = results[0]
     annotated = result.plot()
 
@@ -329,7 +323,8 @@ def process_frame(frame, model, class_names):
             label = raw_label.lower().strip()
             conf = float(box.conf[0])
             
-            if conf < CONF_THRESHOLD:
+            # Đã lọc conf ở hàm model() phía trên, nhưng kiểm tra lại cho chắc chắn
+            if conf < conf_threshold:
                 continue
 
             if is_vi_thuoc_model:
@@ -349,7 +344,8 @@ def process_frame(frame, model, class_names):
                     num_ng += 1
             else:
                 # ===== LOGIC MODEL VIÊN RỜI =====
-                is_ng_class = any(err in label for err in DANH_MUC_LOI_VIEN)
+                # Sửa logic: So sánh khớp hoàn toàn nhãn lỗi để tránh nhầm lẫn
+                is_ng_class = label in [err.lower().strip() for err in DANH_MUC_LOI_VIEN]
                 if is_ng_class:
                     num_ng += 1
                     if raw_label not in loi_chi_tiet:
@@ -405,6 +401,7 @@ def process_frame(frame, model, class_names):
                 status_text = f"VỈ THUỐC ĐẠT CHUẨN ({SO_VIEN_CHUAN_VI}/{SO_VIEN_CHUAN_VI} viên)"
                 result_code  = "SẢN PHẨM OK"
                 is_error = False
+                num_ok = 1 # Đánh dấu 1 vỉ OK
                 details = [f"Đủ {SO_VIEN_CHUAN_VI} viên, không phát hiện lỗi"]
         else:
             if num_ng > 0:
@@ -417,12 +414,12 @@ def process_frame(frame, model, class_names):
                 is_error = False
             details = [f"OK: {num_ok}", f"Lỗi: {num_ng} ({', '.join(loi_hien_thi)})"]
 
-    # --- ĐẨY TÍN HIỆU XUỐNG PLC ---
-    is_ok_pulse = not is_error
-    num_total = num_ok + num_ng
-    send_result_to_plc(is_error, is_ok_pulse, num_ok, num_ng, num_total)
+    # --- GHI CHÚ: Tín hiệu PLC được điều khiển từ main1.py để đảm bảo tính đồng bộ dữ liệu tổng ---
+    # is_ok_pulse = not is_error
+    # num_total = num_ok + num_ng
+    # send_result_to_plc(is_error, is_ok_pulse, num_ok, num_ng, num_total)
 
-    return annotated, status_text, result_code, is_error, details
+    return annotated, status_text, result_code, is_error, details, num_ok, num_ng
 
 # ==============================
 # CHƯƠNG TRÌNH CHÍNH (VÍ DỤ CHẠY CAMERA)
@@ -461,12 +458,14 @@ if __name__ == "__main__":
     cv2.destroyAllWindows()
     # ==============================
 # XỬ LÝ ẢNH ĐƠN (Thêm lại để hết lỗi)
+
 # ==============================
-def process_image(image_path, model, class_names):
+# XỬ LÝ ẢNH ĐƠN
+# ==============================
+def process_image(image_path, model, class_names, conf_threshold=None):
     """Hàm này dùng để kiểm tra thử 1 file ảnh từ ổ cứng"""
     frame = cv2.imread(image_path)
     if frame is None:
-        return None, "Lỗi đọc ảnh", "LỖI FILE", True, ["Không tìm thấy file"]
+        return None, "Lỗi đọc ảnh", "LỖI FILE", True, ["Không tìm thấy file"], 0, 1
     
-    # Gọi lại hàm process_frame đã có sẵn để xử lý
     return process_frame(frame, model, class_names)

@@ -55,13 +55,15 @@ def get_stats():
         total, ok, ng = cur.fetchone()
 
         # 3. Phân tích loại lỗi
-        cur.execute("SELECT result FROM inspections WHERE is_ng = true")
+        error_types = {"Dị vật": 0, "Vỡ/Nứt": 0, "Thiếu viên": 0, "Lỗi vỉ": 0}
+        cur.execute("SELECT product_name, result FROM inspections WHERE is_ng = true")
         rows_ng = cur.fetchall()
-        for r in rows_ng:
-            res_txt = r[0].lower()
+        for prod_name, result in rows_ng:
+            res_txt = result.lower()
             if "di vat" in res_txt: error_types["Dị vật"] += 1
-            elif "vo" in res_txt: error_types["Vỡ"] += 1
-            elif "thieu" in res_txt: error_types["Thiếu viên"] += 1
+            if "vo" in res_txt or "nut" in res_txt: error_types["Vỡ/Nứt"] += 1
+            if "thieu" in res_txt: error_types["Thiếu viên"] += 1
+            if "vỉ" in prod_name.lower(): error_types["Lỗi vỉ"] += 1
 
         # 4. Nhật ký gần nhất (Sử dụng created_at)
         cur.execute("SELECT id, product_name, result, created_at FROM inspections ORDER BY created_at DESC LIMIT 10")
@@ -80,7 +82,8 @@ def get_stats():
         "last_sync": last_sync,
         "error_types": error_types, "hourly_data": hourly_data,
         "hourly_labels": ['1h','2h','3h','4h','5h','6h','7h','8h'],
-        "recent_logs": recent_logs
+        "recent_logs": recent_logs,
+        "is_vi_thuoc": "vỉ" in (recent_logs[0][1].lower() if recent_logs else "")
     })
 
 @app.route('/api/images')

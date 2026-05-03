@@ -1,3 +1,4 @@
+print("=== PHẦN MỀM KIỂM TRA DƯỢC PHẨM ĐANG KHỞI ĐỘNG... ===")
 import cv2
 import tkinter as tk
 from tkinter import font, messagebox, ttk
@@ -21,15 +22,18 @@ SUPABASE_API_URL = os.getenv("SUPABASE_API_URL")
 SUPABASE_KEY = os.getenv("SUPABASE_KEY")
 
 # --- IMPORT FILE LOGIC ĐÃ CẬP NHẬT 4 CLASS ---
+print(">>> Đang nạp module logic...")
 import kiem_tra_thuoc_logic as logic 
+print(">>> Nạp module thành công.")
 
-# --- DANH MỤC MODEL ---
+# --- DANH MỤC MODEL ---2
+MODELS_CONF_THRESHOLD = 0.5  
 MODELS_CONFIG = {
     "Viên rời": r"C:\Users\admin\Downloads\thuocvienL.pt",
     "Vỉ thuốc": r"C:\Users\admin\Downloads\thuoc_yolov8s_best.pt" # Bạn hãy sửa đường dẫn này cho đúng file vỉ thuốc nhé
 }
 DEFAULT_PRODUCT = "Viên rời"
-CAM_SOURCE = 0
+CAM_SOURCE ="http://192.168.1.110:4747/video"
 BAUD_RATE = 115200
 ESP32_IP = "192.168.1.100" 
 
@@ -145,18 +149,42 @@ class App:
         self.root.configure(bg=COLOR_BG)
 
         # --- Kết nối PLC S7-1200 
+        print(f">>> Đang kết nối tới PLC tại địa chỉ: {logic.PLC_IP}...")
         self.plc_connected = logic.connect_to_plc()
         if self.plc_connected:
             # Bật băng tải ngay khi khởi động
             logic.set_conveyor_state(True)
-            print("Hệ thống: Đã kích hoạt băng tải sẵn sàng.")
+            print(">>> Hệ thống: KẾT NỐI PLC THÀNH CÔNG. Đã bật băng tải.")
         else:
-             print("Cảnh báo: Không thể kết nối tới PLC. Chế độ Tự động sẽ không hoạt động.")
+             print(">>> Cảnh báo: KHÔNG THỂ KẾT NỐI TỚI PLC. Chế độ Tự động sẽ không hoạt động.")
 
 
-        # --- Load model AI mặc định ---
+        # --- KHÔI PHỤC DỮ LIỆU TỪ PLC KHI KHỞI ĐỘNG ---
+        self.vien_ok = 0; self.vien_ng = 0; self.vi_ok = 0; self.vi_ng = 0
+        self.total_count = 0
         self.current_product = DEFAULT_PRODUCT
-        self.current_model_id = 1 if DEFAULT_PRODUCT == "Viên rời" else 2 # Khởi tạo ID model
+
+        if self.plc_connected:
+            try:
+                with logic.plc_lock:
+                    raw_total = logic.plc_client.db_read(logic.DB_NUMBER, 2, 8)
+                    raw_detail = logic.plc_client.db_read(logic.DB_NUMBER, 10, 8)
+                
+                # Khôi phục mã sản phẩm trước để load đúng model
+                plc_prod_id = snap7.util.get_int(raw_total, 6)
+                if plc_prod_id in [1, 2]:
+                    self.current_product = "Viên rời" if plc_prod_id == 1 else "Vỉ thuốc"
+                
+                self.total_count = snap7.util.get_int(raw_total, 4)
+                self.vien_ok = snap7.util.get_int(raw_detail, 0)
+                self.vien_ng = snap7.util.get_int(raw_detail, 2)
+                self.vi_ok   = snap7.util.get_int(raw_detail, 4)
+                self.vi_ng   = snap7.util.get_int(raw_detail, 6)
+                print(f">>> Đã khôi phục dữ liệu PLC: {self.current_product} | OK={self.vien_ok}, NG={self.vien_ng}")
+            except: pass
+
+        # --- Load model AI dựa trên sản phẩm đã khôi phục ---
+        self.current_model_id = 1 if self.current_product == "Viên rời" else 2
         self.load_selected_model(MODELS_CONFIG[self.current_product])
 
         # --- Camera (Sử dụng luồng siêu tốc để giảm trễ) ---
@@ -169,11 +197,6 @@ class App:
         self.last_sensor_state = False
         self.total_count = 0
 
-        # --- Đếm riêng từng loại sản phẩm (gửi xuống PLC để ESP32 đọc) ---
-        self.vien_ok = 0  # Viên rời đạt
-        self.vien_ng = 0  # Viên rời lỗi
-        self.vi_ok   = 0  # Vỉ thuốc đạt
-        self.vi_ng   = 0  # Vỉ thuốc lỗi
 
         # --- UI Fonts ---
         self.font_title = font.Font(family="Arial", size=22, weight="bold")
@@ -200,7 +223,7 @@ class App:
             if hasattr(self, 'lbl_info'):
                 self.lbl_info.config(text=f"Đã nạp: {self.current_product}", fg=COLOR_GREEN)
             
-            # --- Gửi mã sản phẩm xuống PLC để ESP32 hiển thị tên ---
+            # --- Gửi mã sản phẩm xuống PLC để ThingsBoard hiển thị ID ---
             product_id = 1 if self.current_product == "Viên rời" else 2
             logic.send_product_id_to_plc(product_id)
             
@@ -218,7 +241,7 @@ class App:
             model_path = MODELS_CONFIG[new_product]
             self.load_selected_model(model_path)
             
-            # --- GỬI MÃ SẢN PHẨM XUỐNG PLC ĐỂ ĐỒNG BỘ WEB ---
+            # --- GỬI MÃ SẢN PHẨM XUỐNG PLC ĐỂ ĐỒNG BỘ THINGSBOARD ---
             product_id = 1 if new_product == "Viên rời" else 2
             logic.send_product_id_to_plc(product_id)
 
@@ -259,16 +282,40 @@ class App:
                 # Nếu PLC trả về 0 (đã bị reset), ta phải reset biến Python tương ứng
                 # DB1.DBW10=VienOK, DBW12=VienNG, DBW14=ViOK, DBW16=ViNG
                 # Ta đọc 8 byte từ offset 10
-                raw_counts = logic.plc_client.db_read(logic.DB_NUMBER, 10, 8)
+                with logic.plc_lock:
+                    raw_counts = logic.plc_client.db_read(logic.DB_NUMBER, 10, 8)
+                
                 plc_vien_ok = snap7.util.get_int(raw_counts, 0)
                 plc_vien_ng = snap7.util.get_int(raw_counts, 2)
                 plc_vi_ok   = snap7.util.get_int(raw_counts, 4)
                 plc_vi_ng   = snap7.util.get_int(raw_counts, 6)
 
-                if plc_vien_ok == 0 and self.vien_ok > 0: self.vien_ok = 0
-                if plc_vien_ng == 0 and self.vien_ng > 0: self.vien_ng = 0
-                if plc_vi_ok == 0 and self.vi_ok > 0: self.vi_ok = 0
-                if plc_vi_ng == 0 and self.vi_ng > 0: self.vi_ng = 0
+                # ĐỒNG BỘ AN TOÀN: Chỉ Reset khi thấy PLC bị xóa về 0 (Manual Reset từ Dashboard)
+                # Hoặc cập nhật Python nếu PLC lớn hơn (đảm bảo tính nhất quán sau khi khởi động lại)
+                if plc_vien_ok == 0 and self.vien_ok > 0: 
+                    print(">>> PLC: Reset counter Viên rời.")
+                    self.vien_ok = 0
+                elif plc_vien_ok > self.vien_ok:
+                    self.vien_ok = plc_vien_ok
+
+                if plc_vien_ng == 0 and self.vien_ng > 0: 
+                    self.vien_ng = 0
+                elif plc_vien_ng > self.vien_ng:
+                    self.vien_ng = plc_vien_ng
+
+                if plc_vi_ok == 0 and self.vi_ok > 0: 
+                    print(">>> PLC: Reset counter Vỉ thuốc.")
+                    self.vi_ok = 0
+                elif plc_vi_ok > self.vi_ok:
+                    self.vi_ok = plc_vi_ok
+
+                if plc_vi_ng == 0 and self.vi_ng > 0: 
+                    self.vi_ng = 0
+                elif plc_vi_ng > self.vi_ng:
+                    self.vi_ng = plc_vi_ng
+                
+                # Cập nhật tổng
+                self.total_count = self.vien_ok + self.vien_ng + self.vi_ok + self.vi_ng
 
                 # --- ĐỌC CẢM BIẾN & TRẠNG THÁI HỆ THỐNG ---
                 current_sensor = logic.read_sensor_trigger()
@@ -284,6 +331,7 @@ class App:
                     rising_edge = (current_sensor == True and self.last_sensor_state == False)
                     if rising_edge:
                         if not self.is_processing:
+                            print(f">>> CẢM BIẾN KÍCH HOẠT (Bit 0.1)! Bắt đầu kiểm tra mẫu: {self.current_product}", flush=True)
                             delay = CAPTURE_DELAY_VI if self.current_product == "Vỉ thuốc" else CAPTURE_DELAY_VIEN
                             if delay > 0: time.sleep(delay)
                             self.root.after(0, self.perform_check)
@@ -320,6 +368,7 @@ class App:
                     "machine_running": machine_status,
                     "cam_online": getattr(self, 'cam_connected', False),
                     "current_model_id": 1 if self.current_product == "Viên rời" else 2,
+                    "current_product": self.current_product,
                     "last_update": time.time()
                 }, f)
             if os.path.exists(status_path): os.remove(status_path)
@@ -335,21 +384,48 @@ class App:
             try:
                 conn = psycopg2.connect(DB_URL)
                 cur = conn.cursor()
+                cur.execute("SET TIME ZONE 'Asia/Ho_Chi_Minh';")
+                # Thử cập nhật thêm các cột số lượng nếu có trong bảng system_status
                 cur.execute("""
-                    INSERT INTO system_status (id, plc_online, machine_running, cam_online, current_model_id, last_update)
-                    VALUES (1, %s, %s, %s, %s, NOW())
+                    INSERT INTO system_status (id, plc_online, machine_running, cam_online, current_model_id, last_update,
+                                             vien_ok, vien_ng, vi_ok, vi_ng)
+                    VALUES (1, %s, %s, %s, %s, NOW(), %s, %s, %s, %s)
                     ON CONFLICT (id) DO UPDATE SET 
                         plc_online = EXCLUDED.plc_online,
                         machine_running = EXCLUDED.machine_running,
                         cam_online = EXCLUDED.cam_online,
                         current_model_id = EXCLUDED.current_model_id,
-                        last_update = EXCLUDED.last_update;
-                """, (plc_online, machine_running, getattr(self, 'cam_connected', False), 1 if self.current_product == "Viên rời" else 2))
+                        last_update = EXCLUDED.last_update,
+                        vien_ok = EXCLUDED.vien_ok,
+                        vien_ng = EXCLUDED.vien_ng,
+                        vi_ok = EXCLUDED.vi_ok,
+                        vi_ng = EXCLUDED.vi_ng;
+                """, (plc_online, machine_running, getattr(self, 'cam_connected', False), 
+                       1 if self.current_product == "Viên rời" else 2,
+                       self.vien_ok, self.vien_ng, self.vi_ok, self.vi_ng))
                 conn.commit()
                 cur.close()
                 conn.close()
             except Exception as e:
-                print(f"Lỗi đẩy trạng thái lên Supabase: {e}")
+                # Nếu bảng chưa có các cột mới, chạy lệnh cũ để không lỗi
+                try:
+                    conn = psycopg2.connect(DB_URL)
+                    cur = conn.cursor()
+                    cur.execute("SET TIME ZONE 'Asia/Ho_Chi_Minh';")
+                    cur.execute("""
+                        INSERT INTO system_status (id, plc_online, machine_running, cam_online, current_model_id, last_update)
+                        VALUES (1, %s, %s, %s, %s, NOW())
+                        ON CONFLICT (id) DO UPDATE SET 
+                            plc_online = EXCLUDED.plc_online,
+                            machine_running = EXCLUDED.machine_running,
+                            cam_online = EXCLUDED.cam_online,
+                            current_model_id = EXCLUDED.current_model_id,
+                            last_update = EXCLUDED.last_update;
+                    """, (plc_online, machine_running, getattr(self, 'cam_connected', False), 1 if self.current_product == "Viên rời" else 2))
+                    conn.commit()
+                    cur.close()
+                    conn.close()
+                except: pass
         threading.Thread(target=run, daemon=True).start()
 
     def upload_to_supabase_storage(self, file_path, file_name):
@@ -369,9 +445,9 @@ class App:
                     # Trả về link public (Đảm bảo Bucket 'inspection-images' đã được chỉnh Public)
                     return f"{SUPABASE_API_URL}/storage/v1/object/public/inspection-images/{file_name}"
                 else:
-                    print(f"Lỗi Upload Storage: {res.status_code} - {res.text}")
+                    print(f"Lỗi Upload Storage: {res.status_code} - {res.text}", flush=True)
         except Exception as e:
-            print(f"Lỗi Upload: {e}")
+            print(f"Lỗi Upload: {e}", flush=True)
         return None
 
     def push_inspection_to_supabase(self, product, result, is_ng, details, image_url=None):
@@ -380,15 +456,16 @@ class App:
             try:
                 conn = psycopg2.connect(DB_URL)
                 cur = conn.cursor()
+                cur.execute("SET TIME ZONE 'Asia/Ho_Chi_Minh';")
                 cur.execute("""
-                    INSERT INTO inspections (product_name, result, is_ng, details, image_url)
-                    VALUES (%s, %s, %s, %s, %s);
+                    INSERT INTO inspections (product_name, result, is_ng, details, image_url, created_at)
+                    VALUES (%s, %s, %s, %s, %s, NOW());
                 """, (product, result, is_ng, " | ".join(details), image_url))
                 conn.commit()
                 cur.close()
                 conn.close()
             except Exception as e:
-                print(f"Lỗi đẩy kết quả lên Supabase: {e}")
+                print(f"Lỗi đẩy kết quả lên Supabase: {e}", flush=True)
         threading.Thread(target=run, daemon=True).start()
 
     def setup_ui(self):
@@ -454,21 +531,28 @@ class App:
         temp_path = os.path.join(BASE_DIR, temp_img_name)
         try:
             cv2.imwrite(temp_path, frame)
-            annotated, info, conclusion, is_ng, details = logic.process_image(temp_path, self.model, self.class_names)
+            annotated, info, conclusion, is_ng, details, n_ok, n_ng = logic.process_image(temp_path, self.model, self.class_names, conf_threshold=MODELS_CONF_THRESHOLD)
             if self.plc_connected:
-                # Cập nhật số lượng cục bộ ngay lập tức
-                if is_ng:
-                    if self.current_product == "Viên rời": self.vien_ng += 1
-                    else: self.vi_ng += 1
+                # Cập nhật số lượng cục bộ dựa trên số lượng AI đếm được
+                if self.current_product == "Viên rời":
+                    self.vien_ok += n_ok
+                    self.vien_ng += n_ng
                 else:
-                    if self.current_product == "Viên rời": self.vien_ok += 1
+                    # Đối với vỉ, ta đếm theo Đơn vị vỉ (1 vỉ OK hoặc 1 vỉ NG)
+                    if is_ng: self.vi_ng += 1
                     else: self.vi_ok += 1
                 
                 try:
                     # Gửi số tổng và số chi tiết lên PLC
                     total_ok = self.vien_ok + self.vi_ok
                     total_ng = self.vien_ng + self.vi_ng
-                    logic.send_result_to_plc(is_error=is_ng, is_ok=not is_ng, num_ok=total_ok, num_ng=total_ng)
+                    total_all = total_ok + total_ng
+                    print(f"PLC: Gửi tín hiệu {'LỖI (NG)' if is_ng else 'ĐẠT (OK)'} | Total={total_all}", flush=True)
+                    
+                    # Gửi Tổng OK, Tổng NG và Tổng Tất cả xuống PLC
+                    logic.send_result_to_plc(is_error=is_ng, is_ok=not is_ng, num_ok=total_ok, num_ng=total_ng, num_total=total_all)
+                    
+                    # Cập nhật số lượng riêng của loại đang chạy lên PLC
                     logic.send_product_specific_counts(self.current_product, 
                         self.vien_ok if self.current_product == "Viên rời" else self.vi_ok,
                         self.vien_ng if self.current_product == "Viên rời" else self.vi_ng)
@@ -479,7 +563,7 @@ class App:
 
             self.root.after(0, lambda: self.finish_check_ui(annotated, info, conclusion, is_ng, details, timestamp))
         except Exception as e:
-            print(f"Lỗi xử lý: {e}")
+            print(f"Lỗi xử lý: {e}", flush=True)
             self.root.after(0, self.reset_system)
         finally:
             if os.path.exists(temp_path): os.remove(temp_path)
@@ -525,7 +609,6 @@ class App:
             with open(EXCEL_FILENAME, mode='a', newline='', encoding='utf-8') as f:
                 writer = csv.writer(f)
                 if not file_exists: writer.writerow(['STT', 'Sản phẩm', 'Kết quả', 'Thời gian'])
-                self.total_count += 1
                 writer.writerow([self.total_count, self.current_product, f"{'[NG]' if is_ng else '[OK]'} {conclusion}", display_time])
         except: pass
 

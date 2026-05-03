@@ -33,14 +33,19 @@ def get_stats():
         total, ok, ng = cur.fetchone()
 
         # 3. Phân tích loại lỗi
-        error_types = {"Dị vật": 0, "Vỡ": 0, "Thiếu viên": 0}
-        cur.execute("SELECT result FROM inspections WHERE is_ng = true")
+        error_types = {"Dị vật": 0, "Vỡ/Nứt": 0, "Thiếu viên": 0, "Lỗi vỉ": 0}
+        cur.execute("SELECT product_name, result FROM inspections WHERE is_ng = true")
         rows_ng = cur.fetchall()
-        for r in rows_ng:
-            res_txt = r[0].lower()
+        for prod_name, result in rows_ng:
+            res_txt = result.lower()
+            # Phân loại theo nội dung lỗi
             if "di vat" in res_txt: error_types["Dị vật"] += 1
-            elif "vo" in res_txt or "nut" in res_txt: error_types["Vỡ"] += 1
-            elif "thieu" in res_txt: error_types["Thiếu viên"] += 1
+            if "vo" in res_txt or "nut" in res_txt: error_types["Vỡ/Nứt"] += 1
+            if "thieu" in res_txt: error_types["Thiếu viên"] += 1
+            
+            # Phân loại theo loại sản phẩm (Lỗi vỉ tổng quát)
+            if "vỉ thuốc" in prod_name.lower() or "vi thuoc" in prod_name.lower():
+                error_types["Lỗi vỉ"] += 1
 
         # 4. Nhật ký gần nhất
         cur.execute("SELECT id, product_name, result, created_at FROM inspections ORDER BY created_at DESC LIMIT 10")
@@ -48,6 +53,7 @@ def get_stats():
         recent_logs = [[str(r[0]), r[1], r[2], r[3].strftime('%H:%M:%S')] for r in rows_logs]
 
         # 5. Thống kê theo giờ (8 giờ gần nhất)
+        # (Giữ nguyên logic cũ nhưng có thể tối ưu nếu cần)
         cur.execute("""
             SELECT 
                 to_char(hour, 'HH24') || 'h' as label,
@@ -67,11 +73,17 @@ def get_stats():
         hourly_labels = [r[0] for r in hourly_rows]
         hourly_data = [r[1] for r in hourly_rows]
 
+        # 6. Thống kê riêng biệt cho Dashboard
+        cur.execute("SELECT COUNT(*) FILTER (WHERE product_name ILIKE '%viên%'), COUNT(*) FILTER (WHERE product_name ILIKE '%vỉ%') FROM inspections")
+        total_vien, total_vi = cur.fetchone()
+
         cur.close()
         conn.close()
 
         return jsonify({
             "total": total, "ok": ok, "ng": ng,
+            "total_vien": total_vien or 0,
+            "total_vi": total_vi or 0,
             "status": "RUNNING" if machine_running else "STOPPED",
             "plc_connected": plc_connected,
             "cam_connected": cam_online,
