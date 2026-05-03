@@ -96,9 +96,9 @@ def get_stats():
         
         # Khởi tạo các loại lỗi tùy theo Model (Viên rời chỉ có Dị vật và Vỡ/Nứt)
         if current_model == 1:
-            error_types = {"Dị vật": 0, "Vỡ/Nứt": 0, "Khác": 0}
+            error_types = {"Dị vật": 0, "Vỡ/Nứt": 0, "Chưa phân loại": 0}
         else:
-            error_types = {"Dị vật": 0, "Vỡ/Nứt": 0, "Thiếu viên": 0, "Khác": 0}
+            error_types = {"Dị vật": 0, "Vỡ/Nứt": 0, "Thiếu viên": 0, "Chưa phân loại": 0}
 
         cur.execute("SELECT result, details FROM inspections WHERE is_ng = true AND product_name = %s", (current_model_name,))
         rows_ng = cur.fetchall()
@@ -118,8 +118,8 @@ def get_stats():
                 error_types["Thiếu viên"] += 1
                 known_count += 1
         
-        # Phần còn lại của counter (bao gồm cả các mẫu NG chưa được phân loại hoặc chưa có log chi tiết) sẽ vào mục "Khác"
-        error_types["Khác"] = max(0, current_ng_total - known_count)
+        # Phần còn lại của counter (bao gồm cả các mẫu NG chưa được phân loại hoặc chưa có log chi tiết) sẽ vào mục "Chưa phân loại"
+        error_types["Chưa phân loại"] = max(0, current_ng_total - known_count)
 
         # 4. Nhật ký gần nhất
         cur.execute("SELECT column_name FROM information_schema.columns WHERE table_name = 'inspections' AND column_name = 'image_url'")
