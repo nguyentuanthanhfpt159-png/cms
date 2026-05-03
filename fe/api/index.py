@@ -137,6 +137,7 @@ def get_stats():
         hourly_labels = [r[0] for r in cur.fetchall()]
         
         vien_hourly = get_hourly_stats("Viên rời")
+        vi_hourly = get_hourly_stats("Vỉ thuốc")
         # Tự động chọn hourly_data theo model hiện tại để biểu đồ chính hiển thị
         hourly_data = vien_hourly if current_model == 1 else vi_hourly
 
