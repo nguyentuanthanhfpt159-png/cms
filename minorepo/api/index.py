@@ -106,33 +106,6 @@ def stats():
         "hourly_labels": ['1h','2h','3h','4h','5h','6h','7h','8h']
     })
 
-MODEL_ERROR_IMAGES = {
-    1: [  # Gói thuốc
-        "pill_20260427_150828.jpg",
-        "pill_20260427_153019.jpg",
-        "pill_20260427_153532.jpg",
-        "pill_20260427_153943.jpg",
-        "pill_20260427_154445.jpg",
-        "pill_20260427_154502.jpg"
-    ],
-    2: [  # Vỉ thuốc
-        "pill_20260428_181206.jpg",
-        "pill_20260428_181225.jpg",
-        "pill_20260428_181257.jpg",
-        "pill_20260428_181332.jpg",
-        "pill_20260428_181350.jpg",
-        "pill_20260428_181402.jpg"
-    ],
-    3: [  # Viên rời
-        "pill_20260427_234510.jpg",
-        "pill_20260428_122827.jpg",
-        "pill_20260428_122847.jpg",
-        "pill_20260428_123217.jpg",
-        "pill_20260428_123251.jpg",
-        "pill_20260428_123310.jpg"
-    ]
-}
-
 @app.route('/api/images')
 @app.route('/api/images/<int:model_id>')
 def images(model_id=None):
@@ -156,8 +129,9 @@ def images(model_id=None):
         model_id = 1
 
     prod_name = MODELS_MAP.get(model_id, "Gói thuốc")
+    image_urls = []
 
-    # 1. Truy vấn ĐỘNG trực tiếp từ bảng inspections trên Supabase Cloud
+    # Truy vấn ĐỘNG 100% từ bảng inspections trên Supabase Cloud
     if DB_URL and psycopg2:
         try:
             conn = psycopg2.connect(DB_URL, connect_timeout=3)
@@ -173,9 +147,8 @@ def images(model_id=None):
             cur.close()
             conn.close()
             if rows:
-                return jsonify([r[0] for r in rows])
-        except Exception:
-            pass
+                image_urls = [r[0] for r in rows]
+        except Exception as e:
+            print("Lỗi truy vấn Supabase:", e)
 
-    # 2. Dự phòng (fallback) nếu Supabase chưa có ảnh cho model đó (ví dụ Gói thuốc)
-    return jsonify(MODEL_ERROR_IMAGES.get(model_id, MODEL_ERROR_IMAGES[1]))
+    return jsonify(image_urls)

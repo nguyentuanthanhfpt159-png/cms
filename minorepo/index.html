@@ -386,31 +386,31 @@
 
     <div class="main-layout">
         <div class="section">
-            <div class="section-title" style="color: var(--danger);">⚠ HÌNH ẢNH LỖI GẦN ĐÂY</div>
+            <div id="img-section-title" class="section-title" style="color: var(--danger);">⚠ HÌNH ẢNH LỖI GẦN ĐÂY - <span id="img-model-title" style="color: var(--primary);">GÓI THUỐC</span></div>
             <div id="img-grid" class="img-grid">
                 <div class="img-box">
-                    <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260501_000618.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260501_000618.jpg';" alt="Ảnh lỗi">
-                    <div class="img-time">0006</div>
+                    <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260427_150828.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260427_150828.jpg';" alt="Ảnh lỗi">
+                    <div class="img-time">1508</div>
                 </div>
                 <div class="img-box">
-                    <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260430_235828.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260430_235828.jpg';" alt="Ảnh lỗi">
-                    <div class="img-time">2358</div>
+                    <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260427_153019.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260427_153019.jpg';" alt="Ảnh lỗi">
+                    <div class="img-time">1530</div>
                 </div>
                 <div class="img-box">
-                    <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260430_235801.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260430_235801.jpg';" alt="Ảnh lỗi">
-                    <div class="img-time">2358</div>
+                    <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260427_153532.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260427_153532.jpg';" alt="Ảnh lỗi">
+                    <div class="img-time">1535</div>
                 </div>
                 <div class="img-box">
-                    <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260430_235736.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260430_235736.jpg';" alt="Ảnh lỗi">
-                    <div class="img-time">2357</div>
+                    <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260427_153943.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260427_153943.jpg';" alt="Ảnh lỗi">
+                    <div class="img-time">1539</div>
                 </div>
                 <div class="img-box">
-                    <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260430_234310.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260430_234310.jpg';" alt="Ảnh lỗi">
-                    <div class="img-time">2343</div>
+                    <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260427_154445.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260427_154445.jpg';" alt="Ảnh lỗi">
+                    <div class="img-time">1544</div>
                 </div>
                 <div class="img-box">
-                    <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260430_230031.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260430_230031.jpg';" alt="Ảnh lỗi">
-                    <div class="img-time">2300</div>
+                    <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260427_154502.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260427_154502.jpg';" alt="Ảnh lỗi">
+                    <div class="img-time">1545</div>
                 </div>
             </div>
         </div>
@@ -500,11 +500,12 @@
             }, 3000);
         }
 
+        let activeModelId = 1;
         let lastUserClickTime = 0;
 
         function setMode(id) {
+            activeModelId = id;
             lastUserClickTime = Date.now();
-            // Phản hồi giao diện tức thì
             document.querySelectorAll('.control-panel .btn').forEach(btn => btn.classList.remove('active'));
             const activeBtn = document.getElementById(`btn-model-${id}`);
             if (activeBtn) activeBtn.classList.add('active');
@@ -513,6 +514,19 @@
             const modelTxt = document.getElementById('model-txt');
             if (modelTxt) modelTxt.innerText = mName.toUpperCase();
 
+            const imgModelTitle = document.getElementById('img-model-title');
+            if (imgModelTitle) imgModelTitle.innerText = mName.toUpperCase();
+
+            // Hiển thị trạng thái đang tải ảnh động
+            const grid = document.getElementById('img-grid');
+            if (grid) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; padding: 36px 16px; color: #94a3b8; font-size: 13px; font-weight: 500;">
+                        <span style="font-size: 18px; margin-right: 8px;">🔄</span> Đang tải ảnh lỗi động của ${mName} từ Supabase...
+                    </div>
+                `;
+            }
+
             showToast(`Đang chuyển sang Model: ${mName}...`);
 
             fetch('/api/set_model/' + id)
@@ -520,6 +534,7 @@
                 .then(res => {
                     if (res.status === "success") {
                         showToast(`Đã kích hoạt Model: ${mName} thành công!`);
+                        updateImages(id, true);
                     } else {
                         showToast("Lỗi: " + (res.message || "Không thể đổi model"), false);
                     }
@@ -527,6 +542,7 @@
                 .catch(err => {
                     console.log("Lỗi fetch set_model:", err);
                     showToast(`Đã chọn Model: ${mName}!`, true);
+                    updateImages(id, true);
                 });
         }
 
@@ -561,14 +577,21 @@
                     // Cập nhật nút Model đang được chọn & Header (chỉ ghi đè nếu người dùng không bấm đổi trong vòng 4s)
                     if (Date.now() - lastUserClickTime > 4000) {
                         const curModel = d.current_model || 1;
-                        document.querySelectorAll('.control-panel .btn').forEach(btn => btn.classList.remove('active'));
-                        const activeBtn = document.getElementById(`btn-model-${curModel}`);
-                        if (activeBtn) activeBtn.classList.add('active');
+                        if (curModel !== activeModelId) {
+                            activeModelId = curModel;
+                            document.querySelectorAll('.control-panel .btn').forEach(btn => btn.classList.remove('active'));
+                            const activeBtn = document.getElementById(`btn-model-${curModel}`);
+                            if (activeBtn) activeBtn.classList.add('active');
 
-                        const modelTxt = document.getElementById('model-txt');
-                        if (modelTxt) {
-                            const mName = MODEL_NAMES[curModel] || ("Model #" + curModel);
-                            modelTxt.innerText = mName.toUpperCase();
+                            const modelTxt = document.getElementById('model-txt');
+                            if (modelTxt) {
+                                const mName = MODEL_NAMES[curModel] || ("Model #" + curModel);
+                                modelTxt.innerText = mName.toUpperCase();
+                            }
+                            const imgModelTitle = document.getElementById('img-model-title');
+                            if (imgModelTitle) imgModelTitle.innerText = (MODEL_NAMES[curModel] || "").toUpperCase();
+
+                            updateImages(curModel, true);
                         }
                     }
 
@@ -624,41 +647,46 @@
                     statusEl.style.color = "#ef4444";
                 });
         }
-        
-        const DEFAULT_ERROR_IMAGES = [
-            "pill_20260501_000618.jpg",
-            "pill_20260430_235828.jpg",
-            "pill_20260430_235801.jpg",
-            "pill_20260430_235736.jpg",
-            "pill_20260430_234310.jpg",
-            "pill_20260430_230031.jpg"
-        ];
 
         let lastRenderedImagesJson = "";
 
-        function renderImages(imgs) {
+        function renderImages(imgs, force = false) {
             const grid = document.getElementById('img-grid');
             if (!grid) return;
-            const list = (imgs && imgs.length > 0) ? imgs.slice(0, 6) : DEFAULT_ERROR_IMAGES;
+            const list = (imgs && Array.isArray(imgs)) ? imgs.slice(0, 6) : [];
 
             // Kiểm tra trùng lặp để tránh render lại gây nhấp nháy ảnh
-            const jsonKey = JSON.stringify(list);
-            if (jsonKey === lastRenderedImagesJson) return;
+            const jsonKey = JSON.stringify(list) + "_" + activeModelId;
+            if (!force && jsonKey === lastRenderedImagesJson) return;
             lastRenderedImagesJson = jsonKey;
+
+            const mName = MODEL_NAMES[activeModelId] || ("Model #" + activeModelId);
+
+            if (list.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 32px 16px; background: rgba(15, 23, 42, 0.4); border: 1px dashed rgba(255, 255, 255, 0.12); border-radius: 12px; text-align: center;">
+                        <span style="font-size: 32px; margin-bottom: 8px;">📷</span>
+                        <div style="font-weight: 600; font-size: 14px; color: #e2e8f0; margin-bottom: 4px;">Chưa có ảnh lỗi nào trên Supabase</div>
+                        <div style="font-size: 12px; color: #94a3b8;">Hệ thống camera AI đang hoạt động và sẽ cập nhật ảnh ngay khi phát hiện lỗi mới của ${mName}.</div>
+                    </div>
+                `;
+                return;
+            }
 
             const isLocal = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
 
             grid.innerHTML = '';
             list.forEach(img => {
                 let primaryUrl, fallbackUrl;
+                const cleanFileName = img.includes('/') ? img.split('/').pop() : img;
                 if (img.startsWith('http')) {
                     primaryUrl = img;
                     fallbackUrl = '';
                 } else if (isLocal) {
                     primaryUrl = `/error_images/${img}`;
-                    fallbackUrl = `https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/${img}`;
+                    fallbackUrl = `https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/${cleanFileName}`;
                 } else {
-                    primaryUrl = `https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/${img}`;
+                    primaryUrl = `https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/${cleanFileName}`;
                     fallbackUrl = `/error_images/${img}`;
                 }
 
@@ -675,26 +703,29 @@
 
                 grid.innerHTML += `
                     <div class="img-box">
-                        <img src="${primaryUrl}" alt="Ảnh lỗi" ${onerrorAttr}>
+                        <img src="${primaryUrl}" alt="Ảnh lỗi Supabase" ${onerrorAttr}>
                         <div class="img-time">${timeTag}</div>
                     </div>
                 `;
             });
         }
 
-        function updateImages() {
-            fetch('/api/images')
+        function updateImages(mId, force = false) {
+            const m = mId || activeModelId || 1;
+            fetch('/api/images?model=' + m)
                 .then(r => r.json())
                 .then(imgs => {
-                    renderImages(imgs);
+                    renderImages(imgs, force);
                 })
                 .catch(e => {
-                    renderImages(DEFAULT_ERROR_IMAGES);
+                    console.log("Lỗi tải ảnh Supabase:", e);
+                    renderImages([], force);
                 });
         }
 
         initCharts();
-        renderImages(DEFAULT_ERROR_IMAGES);
+        update();
+        updateImages(activeModelId, true);
         setInterval(() => {
             update();
             updateImages();
