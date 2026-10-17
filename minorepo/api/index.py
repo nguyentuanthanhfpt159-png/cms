@@ -93,7 +93,7 @@ def stats():
             pass
 
     if total == 0:
-        total, ok, ng = 394, 150, 244
+        total, ok, ng = 2839, 2710, 129
 
     return jsonify({
         "total": total, "ok": ok, "ng": ng,
@@ -106,6 +106,15 @@ def stats():
         "hourly_labels": ['1h','2h','3h','4h','5h','6h','7h','8h']
     })
 
+DEFAULT_ERROR_IMAGES = [
+    "pill_20260501_000618.jpg",
+    "pill_20260430_235828.jpg",
+    "pill_20260430_235801.jpg",
+    "pill_20260430_235736.jpg",
+    "pill_20260430_234310.jpg",
+    "pill_20260430_230031.jpg"
+]
+
 @app.route('/api/images')
 def images():
-    return jsonify([])
+    return jsonify(DEFAULT_ERROR_IMAGES)
