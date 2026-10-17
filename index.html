@@ -693,32 +693,33 @@
             }, 3000);
         }
 
-        let activeModelId = 1;
+        let activeModelId = parseInt(localStorage.getItem('pharma_active_model')) || 1;
         let lastUserClickTime = 0;
+        let lastHourlyJson = "";
+        let lastErrorTypesJson = "";
+        let lastRenderedImagesJson = "";
+
+        // Thiết lập trạng thái nút ban đầu theo activeModelId
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.control-panel .btn').forEach(btn => btn.classList.remove('active'));
+            const initialBtn = document.getElementById(`btn-model-${activeModelId}`);
+            if (initialBtn) initialBtn.classList.add('active');
+            const imgModelTitle = document.getElementById('img-model-title');
+            if (imgModelTitle) imgModelTitle.innerText = (MODEL_NAMES[activeModelId] || "").toUpperCase();
+        });
 
         function setMode(id) {
             activeModelId = id;
             lastUserClickTime = Date.now();
+            try { localStorage.setItem('pharma_active_model', id); } catch(e){}
+
             document.querySelectorAll('.control-panel .btn').forEach(btn => btn.classList.remove('active'));
             const activeBtn = document.getElementById(`btn-model-${id}`);
             if (activeBtn) activeBtn.classList.add('active');
 
             const mName = MODEL_NAMES[id] || ("Model #" + id);
-            const modelTxt = document.getElementById('model-txt');
-            if (modelTxt) modelTxt.innerText = mName.toUpperCase();
-
             const imgModelTitle = document.getElementById('img-model-title');
             if (imgModelTitle) imgModelTitle.innerText = mName.toUpperCase();
-
-            // Hiển thị trạng thái đang tải ảnh động
-            const grid = document.getElementById('img-grid');
-            if (grid) {
-                grid.innerHTML = `
-                    <div style="grid-column: 1 / -1; display: flex; align-items: center; justify-content: center; padding: 36px 16px; color: #94a3b8; font-size: 13px; font-weight: 500;">
-                        <span style="font-size: 18px; margin-right: 8px;">🔄</span> Đang tải ảnh lỗi động của ${mName} từ Supabase...
-                    </div>
-                `;
-            }
 
             showToast(`Đang chuyển sang Model: ${mName}...`);
             update(id);
@@ -753,41 +754,36 @@
                     statusEl.innerText = d.status;
                     statusEl.style.color = (d.status === "RUNNING") ? "#10b981" : "#ef4444";
 
-                    // Cập nhật biểu đồ theo đúng danh mục lỗi của từng Model riêng biệt
+                    // Cập nhật biểu đồ MƯỢT MÀ, KHÔNG TỰ ĐỘNG CHẠY LẠI ANIMATION GÂY NHẢY LIÊN TỤC
                     try {
-                        if (lineChart) {
-                            if (d.hourly_labels) lineChart.data.labels = d.hourly_labels;
-                            lineChart.data.datasets[0].data = d.hourly_data;
-                            lineChart.update();
+                        if (lineChart && d.hourly_data) {
+                            const newHourlyStr = JSON.stringify(d.hourly_data);
+                            if (newHourlyStr !== lastHourlyJson) {
+                                lastHourlyJson = newHourlyStr;
+                                if (d.hourly_labels) lineChart.data.labels = d.hourly_labels;
+                                lineChart.data.datasets[0].data = d.hourly_data;
+                                lineChart.update('none');
+                            }
                         }
                         if (pieChart && d.error_types) {
-                            pieChart.data.labels = Object.keys(d.error_types);
-                            pieChart.data.datasets[0].data = Object.values(d.error_types);
-                            pieChart.update();
+                            const newErrorStr = JSON.stringify(d.error_types);
+                            if (newErrorStr !== lastErrorTypesJson) {
+                                lastErrorTypesJson = newErrorStr;
+                                pieChart.data.labels = Object.keys(d.error_types);
+                                pieChart.data.datasets[0].data = Object.values(d.error_types);
+                                pieChart.update('none');
+                            }
                         }
                     } catch (e) {
                         console.log("Biểu đồ chưa sẵn sàng hoặc thiếu thư viện Chart.js");
                     }
 
-                    // Cập nhật nút Model đang được chọn & Header (chỉ ghi đè nếu người dùng không bấm đổi trong vòng 4s)
-                    if (Date.now() - lastUserClickTime > 4000) {
-                        const curModel = d.current_model || 1;
-                        if (curModel !== activeModelId) {
-                            activeModelId = curModel;
-                            document.querySelectorAll('.control-panel .btn').forEach(btn => btn.classList.remove('active'));
-                            const activeBtn = document.getElementById(`btn-model-${curModel}`);
-                            if (activeBtn) activeBtn.classList.add('active');
-
-                            const modelTxt = document.getElementById('model-txt');
-                            if (modelTxt) {
-                                const mName = MODEL_NAMES[curModel] || ("Model #" + curModel);
-                                modelTxt.innerText = mName.toUpperCase();
-                            }
-                            const imgModelTitle = document.getElementById('img-model-title');
-                            if (imgModelTitle) imgModelTitle.innerText = (MODEL_NAMES[curModel] || "").toUpperCase();
-
-                            updateImages(curModel, true);
-                        }
+                    // Cập nhật trạng thái Robot đang chạy trên thanh Header
+                    const robotModelId = d.robot_model || d.current_model || 1;
+                    const modelTxt = document.getElementById('model-txt');
+                    if (modelTxt) {
+                        const rName = MODEL_NAMES[robotModelId] || ("Model #" + robotModelId);
+                        modelTxt.innerText = rName.toUpperCase();
                     }
 
                     // Cập nhật trạng thái PLC (Tức thì)
@@ -826,34 +822,39 @@
                 })
                 .catch(err => {
                     console.log("Không thể kết nối đến máy chủ:", err);
-                    // Đặt trạng thái về OFFLINE nếu mất kết nối với web_dashboard
                     const plcTxt = document.getElementById('plc-txt');
                     const plcDot = document.getElementById('plc-dot');
-                    plcTxt.innerText = "OFFLINE"; plcTxt.style.color = "#ef4444";
-                    plcDot.style.color = "#ef4444"; plcDot.style.background = "#ef4444";
+                    if (plcTxt && plcDot) {
+                        plcTxt.innerText = "OFFLINE"; plcTxt.style.color = "#ef4444";
+                        plcDot.style.color = "#ef4444"; plcDot.style.background = "#ef4444";
+                    }
 
                     const camTxt = document.getElementById('cam-txt');
                     const camDot = document.getElementById('cam-dot');
-                    camTxt.innerText = "OFFLINE"; camTxt.style.color = "#ef4444";
-                    camDot.style.color = "#ef4444"; camDot.style.background = "#ef4444";
+                    if (camTxt && camDot) {
+                        camTxt.innerText = "OFFLINE"; camTxt.style.color = "#ef4444";
+                        camDot.style.color = "#ef4444"; camDot.style.background = "#ef4444";
+                    }
 
                     const statusEl = document.getElementById('val-status');
-                    statusEl.innerText = "DISCONNECTED";
-                    statusEl.style.color = "#ef4444";
+                    if (statusEl) {
+                        statusEl.innerText = "DISCONNECTED";
+                        statusEl.style.color = "#ef4444";
+                    }
                 });
         }
 
-        let lastRenderedImagesJson = "";
+        let lastRenderedImagesKey = "";
 
         function renderImages(imgs, force = false) {
             const grid = document.getElementById('img-grid');
             if (!grid) return;
             const list = (imgs && Array.isArray(imgs)) ? imgs.slice(0, 6) : [];
 
-            // Kiểm tra trùng lặp để tránh render lại gây nhấp nháy ảnh
+            // Kiểm tra trùng lặp để tránh render lại DOM gây chớp/nháy ảnh
             const jsonKey = JSON.stringify(list) + "_" + activeModelId;
-            if (!force && jsonKey === lastRenderedImagesJson) return;
-            lastRenderedImagesJson = jsonKey;
+            if (!force && jsonKey === lastRenderedImagesKey) return;
+            lastRenderedImagesKey = jsonKey;
 
             const mName = MODEL_NAMES[activeModelId] || ("Model #" + activeModelId);
 

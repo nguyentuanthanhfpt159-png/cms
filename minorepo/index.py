@@ -162,6 +162,7 @@ def stats():
         "total": total, "ok": ok, "ng": ng,
         "status": status, "plc_connected": plc_connected, "cam_connected": cam_connected,
         "current_model": current_model,
+        "robot_model": db_model_id if 'db_model_id' in locals() and db_model_id else current_model,
         "model_name": MODELS_MAP.get(current_model, "Gói thuốc"),
         "last_sync": last_sync,
         "recent_logs": recent_logs,

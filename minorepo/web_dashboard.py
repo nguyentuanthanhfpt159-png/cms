@@ -1,9 +1,13 @@
 from flask import Flask, render_template, jsonify, send_from_directory, request
 import os
+import sys
 import time
 import json
 import pandas as pd
 from datetime import datetime
+
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 try:
     import psycopg2
 except ImportError:
@@ -205,6 +209,7 @@ def get_stats():
         "total": total, "ok": ok, "ng": ng,
         "status": status, "plc_connected": plc_connected, "cam_connected": cam_connected,
         "current_model": current_model,
+        "robot_model": db_model_id if 'db_model_id' in locals() and db_model_id else current_model,
         "model_name": MODELS_MAP.get(current_model, {}).get("name", "Gói thuốc"),
         "last_sync": last_sync,
         "error_types": error_types, "hourly_data": hourly_data,
