@@ -388,7 +388,30 @@
         <div class="section">
             <div class="section-title" style="color: var(--danger);">⚠ HÌNH ẢNH LỖI GẦN ĐÂY</div>
             <div id="img-grid" class="img-grid">
-                <!-- Images via JS -->
+                <div class="img-box">
+                    <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260501_000618.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260501_000618.jpg';" alt="Ảnh lỗi">
+                    <div class="img-time">0006</div>
+                </div>
+                <div class="img-box">
+                    <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260430_235828.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260430_235828.jpg';" alt="Ảnh lỗi">
+                    <div class="img-time">2358</div>
+                </div>
+                <div class="img-box">
+                    <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260430_235801.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260430_235801.jpg';" alt="Ảnh lỗi">
+                    <div class="img-time">2358</div>
+                </div>
+                <div class="img-box">
+                    <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260430_235736.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260430_235736.jpg';" alt="Ảnh lỗi">
+                    <div class="img-time">2357</div>
+                </div>
+                <div class="img-box">
+                    <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260430_234310.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260430_234310.jpg';" alt="Ảnh lỗi">
+                    <div class="img-time">2343</div>
+                </div>
+                <div class="img-box">
+                    <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260430_230031.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260430_230031.jpg';" alt="Ảnh lỗi">
+                    <div class="img-time">2300</div>
+                </div>
             </div>
         </div>
         <div class="section">
@@ -600,26 +623,84 @@
                     statusEl.innerText = "DISCONNECTED";
                     statusEl.style.color = "#ef4444";
                 });
+        }
+        
+        const DEFAULT_ERROR_IMAGES = [
+            "pill_20260501_000618.jpg",
+            "pill_20260430_235828.jpg",
+            "pill_20260430_235801.jpg",
+            "pill_20260430_235736.jpg",
+            "pill_20260430_234310.jpg",
+            "pill_20260430_230031.jpg"
+        ];
 
+        let lastRenderedImagesJson = "";
+
+        function renderImages(imgs) {
+            const grid = document.getElementById('img-grid');
+            if (!grid) return;
+            const list = (imgs && imgs.length > 0) ? imgs.slice(0, 6) : DEFAULT_ERROR_IMAGES;
+
+            // Kiểm tra trùng lặp để tránh render lại gây nhấp nháy ảnh
+            const jsonKey = JSON.stringify(list);
+            if (jsonKey === lastRenderedImagesJson) return;
+            lastRenderedImagesJson = jsonKey;
+
+            const isLocal = (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1');
+
+            grid.innerHTML = '';
+            list.forEach(img => {
+                let primaryUrl, fallbackUrl;
+                if (img.startsWith('http')) {
+                    primaryUrl = img;
+                    fallbackUrl = '';
+                } else if (isLocal) {
+                    primaryUrl = `/error_images/${img}`;
+                    fallbackUrl = `https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/${img}`;
+                } else {
+                    primaryUrl = `https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/${img}`;
+                    fallbackUrl = `/error_images/${img}`;
+                }
+
+                let timeTag = "NG";
+                if (img.includes('_')) {
+                    const parts = img.split('_');
+                    if (parts.length > 2) timeTag = parts[2].substring(0, 4);
+                    else if (parts.length > 1) timeTag = parts[1].substring(0, 4);
+                }
+
+                const onerrorAttr = fallbackUrl 
+                    ? `onerror="this.onerror=null;this.src='${fallbackUrl}';"` 
+                    : `onerror="this.style.opacity='0.4';"`;
+
+                grid.innerHTML += `
+                    <div class="img-box">
+                        <img src="${primaryUrl}" alt="Ảnh lỗi" ${onerrorAttr}>
+                        <div class="img-time">${timeTag}</div>
+                    </div>
+                `;
+            });
+        }
+
+        function updateImages() {
             fetch('/api/images')
                 .then(r => r.json())
                 .then(imgs => {
-                    const grid = document.getElementById('img-grid');
-                    grid.innerHTML = '';
-                    imgs.forEach(img => {
-                        grid.innerHTML += `
-                            <div class="img-box">
-                                <img src="/error_images/${img}">
-                                <div class="img-time">${img.split('_')[1].substring(0, 4)}</div>
-                            </div>
-                        `;
-                    });
+                    renderImages(imgs);
+                })
+                .catch(e => {
+                    renderImages(DEFAULT_ERROR_IMAGES);
                 });
         }
 
         initCharts();
-        setInterval(update, 2000);
+        renderImages(DEFAULT_ERROR_IMAGES);
+        setInterval(() => {
+            update();
+            updateImages();
+        }, 2000);
         update();
+        updateImages();
     </script>
 </body>
 
