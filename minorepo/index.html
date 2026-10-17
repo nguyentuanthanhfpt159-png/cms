@@ -77,43 +77,87 @@
         /* NÚT ĐIỀU KHIỂN */
         .control-panel {
             display: grid;
-            grid-template-columns: 1fr 1fr;
+            grid-template-columns: repeat(3, 1fr);
             gap: 15px;
             margin-bottom: 25px;
         }
 
         .btn {
-            padding: 15px;
+            padding: 16px 20px;
             border: 1px solid var(--glass-border);
-            border-radius: 15px;
-            background: var(--glass);
-            color: white;
-            font-weight: bold;
+            border-radius: 16px;
+            background: rgba(255, 255, 255, 0.03);
+            color: #94a3b8;
+            font-weight: 700;
             cursor: pointer;
-            transition: all 0.3s;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             text-transform: uppercase;
             letter-spacing: 1px;
+            font-size: 13px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            position: relative;
+            overflow: hidden;
         }
 
         .btn:hover {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.08);
+            color: #ffffff;
             transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.25);
         }
 
         .btn.active {
-            background: linear-gradient(135deg, #3b82f6, #2563eb);
+            background: linear-gradient(135deg, #2563eb, #1d4ed8);
+            color: #ffffff;
             border-color: #60a5fa;
-            box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4);
+            box-shadow: 0 0 25px rgba(37, 99, 235, 0.45), inset 0 0 10px rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+
+        .btn.active::after {
+            content: '● ĐANG CHỌN';
+            position: absolute;
+            bottom: 3px;
+            font-size: 8px;
+            letter-spacing: 0.5px;
+            color: #93c5fd;
+            font-weight: 800;
         }
 
         .btn:active {
-            transform: scale(0.95);
+            transform: scale(0.96);
         }
 
-        .btn-active {
-            background: var(--primary);
-            border-color: var(--primary);
-            box-shadow: 0 0 20px rgba(59, 130, 246, 0.4);
+        /* TOAST THÔNG BÁO ĐỔI MODEL */
+        .toast {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: rgba(15, 23, 42, 0.95);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(59, 130, 246, 0.5);
+            color: #ffffff;
+            padding: 14px 22px;
+            border-radius: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(59, 130, 246, 0.3);
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 9999;
+            transform: translateY(100px);
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            pointer-events: none;
+        }
+
+        .toast.show {
+            transform: translateY(0);
+            opacity: 1;
         }
 
         /* CARD THÔNG SỐ */
@@ -294,6 +338,8 @@
                 <span id="sync-time" style="color: #60a5fa;">--:--:--</span></div>
         </div>
         <div class="status-group">
+            <div class="st-item"><span id="model-dot" class="dot" style="color: #3b82f6; background: #3b82f6;"></span>
+                MODEL: <span id="model-txt" style="color: #60a5fa; font-weight: 700;">GÓI THUỐC</span></div>
             <div class="st-item"><span id="plc-dot" class="dot" style="color: #ef4444; background: #ef4444;"></span>
                 PLC: <span id="plc-txt" style="color: #ef4444;">OFFLINE</span></div>
             <div class="st-item"><span id="cam-dot" class="dot" style="color: #ef4444; background: #ef4444;"></span>
@@ -302,8 +348,9 @@
     </div>
 
     <div class="control-panel">
-        <button id="btn-model-1" class="btn" onclick="setMode(1)">📦 Model: Viên rời</button>
+        <button id="btn-model-1" class="btn active" onclick="setMode(1)">📦 Model: Gói thuốc</button>
         <button id="btn-model-2" class="btn" onclick="setMode(2)">💊 Model: Vỉ thuốc</button>
+        <button id="btn-model-3" class="btn" onclick="setMode(3)">🔘 Model: Viên rời</button>
     </div>
 
     <div class="stats-grid">
@@ -406,14 +453,52 @@
             } catch (e) {
                 console.log("Lỗi khởi tạo biểu đồ:", e);
             }
+        const MODEL_NAMES = {
+            1: "Gói thuốc",
+            2: "Vỉ thuốc",
+            3: "Viên rời"
+        };
+
+        function showToast(msg, isSuccess = true) {
+            let toast = document.getElementById('toast-msg');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast-msg';
+                toast.className = 'toast';
+                document.body.appendChild(toast);
+            }
+            toast.innerHTML = (isSuccess ? "✅ " : "⚠️ ") + msg;
+            toast.style.borderColor = isSuccess ? "rgba(59, 130, 246, 0.6)" : "rgba(239, 68, 68, 0.6)";
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
 
         function setMode(id) {
+            // Phản hồi giao diện tức thì
+            document.querySelectorAll('.control-panel .btn').forEach(btn => btn.classList.remove('active'));
+            const activeBtn = document.getElementById(`btn-model-${id}`);
+            if (activeBtn) activeBtn.classList.add('active');
+
+            const mName = MODEL_NAMES[id] || ("Model #" + id);
+            const modelTxt = document.getElementById('model-txt');
+            if (modelTxt) modelTxt.innerText = mName.toUpperCase();
+
+            showToast(`Đang chuyển sang Model: ${mName}...`);
+
             fetch('/api/set_model/' + id)
                 .then(r => r.json())
                 .then(res => {
-                    if (res.status == "success") alert("Đã ra lệnh đổi Model thành công!");
-                    else alert("Lỗi: " + res.message);
+                    if (res.status === "success") {
+                        showToast(`Đã kích hoạt Model: ${mName} thành công!`);
+                    } else {
+                        showToast("Lỗi: " + (res.message || "Không thể đổi model"), false);
+                    }
+                })
+                .catch(err => {
+                    console.log("Lỗi fetch set_model:", err);
+                    showToast("Đã gửi lệnh đổi Model!", true);
                 });
         }
 
@@ -445,11 +530,17 @@
                         console.log("Biểu đồ chưa sẵn sàng hoặc thiếu thư viện Chart.js");
                     }
 
-                    // Cập nhật nút Model đang được chọn
-                    const curModel = d.current_model;
+                    // Cập nhật nút Model đang được chọn & Header
+                    const curModel = d.current_model || 1;
                     document.querySelectorAll('.control-panel .btn').forEach(btn => btn.classList.remove('active'));
                     const activeBtn = document.getElementById(`btn-model-${curModel}`);
                     if (activeBtn) activeBtn.classList.add('active');
+
+                    const modelTxt = document.getElementById('model-txt');
+                    if (modelTxt) {
+                        const mName = MODEL_NAMES[curModel] || ("Model #" + curModel);
+                        modelTxt.innerText = mName.toUpperCase();
+                    }
 
                     // Cập nhật trạng thái PLC (Tức thì)
                     const plcTxt = document.getElementById('plc-txt');
