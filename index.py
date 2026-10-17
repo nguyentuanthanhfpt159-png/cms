@@ -7,7 +7,7 @@ except ImportError:
 from datetime import datetime
 
 app = Flask(__name__)
-DB_URL = os.getenv("SUPABASE_URL")
+DB_URL = os.getenv("SUPABASE_URL") or "postgresql://postgres.tpafcikfwcwockoclatq:TuanThanh%402026@aws-1-ap-northeast-2.pooler.supabase.com:6543/postgres"
 
 MODELS_MAP = {
     1: "Gói thuốc",
@@ -107,5 +107,49 @@ def stats():
     })
 
 @app.route('/api/images')
-def images():
-    return jsonify([])
+@app.route('/api/images/<int:model_id>')
+def images(model_id=None):
+    if model_id is None:
+        model_id = request.args.get('model', type=int)
+
+    if model_id is None and DB_URL and psycopg2:
+        try:
+            conn = psycopg2.connect(DB_URL, connect_timeout=3)
+            cur = conn.cursor()
+            cur.execute("SELECT current_model_id FROM system_status WHERE id = 1")
+            row = cur.fetchone()
+            if row and row[0]:
+                model_id = row[0]
+            cur.close()
+            conn.close()
+        except Exception:
+            pass
+
+    if model_id is None:
+        model_id = 1
+
+    prod_name = MODELS_MAP.get(model_id, "Gói thuốc")
+    image_urls = []
+
+    # Truy vấn ĐỘNG 100% từ bảng inspections trên Supabase Cloud
+    if DB_URL and psycopg2:
+        try:
+            conn = psycopg2.connect(DB_URL, connect_timeout=3)
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT image_url 
+                FROM inspections 
+                WHERE product_name ILIKE %s AND is_ng = true AND image_url IS NOT NULL AND image_url != ''
+                ORDER BY created_at DESC 
+                LIMIT 6;
+            """, (f"%{prod_name}%",))
+            rows = cur.fetchall()
+            cur.close()
+            conn.close()
+            if rows:
+                image_urls = [r[0] for r in rows]
+        except Exception as e:
+            print("Lỗi truy vấn Supabase:", e)
+
+    return jsonify(image_urls)
+
