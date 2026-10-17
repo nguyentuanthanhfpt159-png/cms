@@ -106,15 +106,76 @@ def stats():
         "hourly_labels": ['1h','2h','3h','4h','5h','6h','7h','8h']
     })
 
-DEFAULT_ERROR_IMAGES = [
-    "pill_20260501_000618.jpg",
-    "pill_20260430_235828.jpg",
-    "pill_20260430_235801.jpg",
-    "pill_20260430_235736.jpg",
-    "pill_20260430_234310.jpg",
-    "pill_20260430_230031.jpg"
-]
+MODEL_ERROR_IMAGES = {
+    1: [  # Gói thuốc
+        "pill_20260427_150828.jpg",
+        "pill_20260427_153019.jpg",
+        "pill_20260427_153532.jpg",
+        "pill_20260427_153943.jpg",
+        "pill_20260427_154445.jpg",
+        "pill_20260427_154502.jpg"
+    ],
+    2: [  # Vỉ thuốc
+        "pill_20260428_181206.jpg",
+        "pill_20260428_181225.jpg",
+        "pill_20260428_181257.jpg",
+        "pill_20260428_181332.jpg",
+        "pill_20260428_181350.jpg",
+        "pill_20260428_181402.jpg"
+    ],
+    3: [  # Viên rời
+        "pill_20260427_234510.jpg",
+        "pill_20260428_122827.jpg",
+        "pill_20260428_122847.jpg",
+        "pill_20260428_123217.jpg",
+        "pill_20260428_123251.jpg",
+        "pill_20260428_123310.jpg"
+    ]
+}
 
 @app.route('/api/images')
-def images():
-    return jsonify(DEFAULT_ERROR_IMAGES)
+@app.route('/api/images/<int:model_id>')
+def images(model_id=None):
+    if model_id is None:
+        model_id = request.args.get('model', type=int)
+
+    if model_id is None and DB_URL and psycopg2:
+        try:
+            conn = psycopg2.connect(DB_URL, connect_timeout=3)
+            cur = conn.cursor()
+            cur.execute("SELECT current_model_id FROM system_status WHERE id = 1")
+            row = cur.fetchone()
+            if row and row[0]:
+                model_id = row[0]
+            cur.close()
+            conn.close()
+        except Exception:
+            pass
+
+    if model_id is None:
+        model_id = 1
+
+    prod_name = MODELS_MAP.get(model_id, "Gói thuốc")
+
+    # 1. Truy vấn ĐỘNG trực tiếp từ bảng inspections trên Supabase Cloud
+    if DB_URL and psycopg2:
+        try:
+            conn = psycopg2.connect(DB_URL, connect_timeout=3)
+            cur = conn.cursor()
+            cur.execute("""
+                SELECT image_url 
+                FROM inspections 
+                WHERE product_name ILIKE %s AND is_ng = true AND image_url IS NOT NULL AND image_url != ''
+                ORDER BY created_at DESC 
+                LIMIT 6;
+            """, (f"%{prod_name}%",))
+            rows = cur.fetchall()
+            cur.close()
+            conn.close()
+            if rows:
+                return jsonify([r[0] for r in rows])
+        except Exception:
+            pass
+
+    # 2. Dự phòng (fallback) nếu Supabase chưa có ảnh cho model đó (ví dụ Gói thuốc)
+    return jsonify(MODEL_ERROR_IMAGES.get(model_id, MODEL_ERROR_IMAGES[1]))
