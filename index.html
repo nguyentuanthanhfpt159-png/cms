@@ -253,27 +253,220 @@
             overflow: hidden;
             position: relative;
             background: #000;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .img-box:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), 0 0 12px rgba(239, 68, 68, 0.4);
+            border-color: rgba(239, 68, 68, 0.7);
         }
 
         .img-box img {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            transition: 0.3s;
+            transition: transform 0.3s ease;
         }
 
         .img-box:hover img {
-            transform: scale(1.1);
+            transform: scale(1.08);
+        }
+
+        .img-box::before {
+            content: '🔍 Xem ảnh lớn';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: rgba(15, 23, 42, 0.88);
+            color: #fff;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 5px 9px;
+            border-radius: 6px;
+            opacity: 0;
+            transition: opacity 0.2s, transform 0.2s;
+            pointer-events: none;
+            white-space: nowrap;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            z-index: 5;
+        }
+
+        .img-box:hover::before {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1.05);
         }
 
         .img-time {
             position: absolute;
             bottom: 5px;
             right: 5px;
-            background: rgba(0, 0, 0, 0.7);
+            background: rgba(0, 0, 0, 0.75);
             font-size: 10px;
             padding: 2px 6px;
             border-radius: 4px;
+            z-index: 6;
+        }
+
+        /* MODAL PHÓNG TO & ZOOM ẢNH CHI TIẾT */
+        .img-modal {
+            display: none;
+            position: fixed;
+            z-index: 99999;
+            left: 0;
+            top: 0;
+            width: 100vw;
+            height: 100vh;
+            background: rgba(10, 15, 29, 0.88);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.25s ease;
+        }
+
+        .img-modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .img-modal-content {
+            background: #0f172a;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 20px;
+            box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.8), 0 0 30px rgba(59, 130, 246, 0.15);
+            width: 90vw;
+            max-width: 950px;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            animation: modalScaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        @keyframes modalScaleIn {
+            from { transform: scale(0.92); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+
+        .img-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 20px;
+            background: rgba(30, 41, 59, 0.8);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .img-modal-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #f8fafc;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-badge-ng {
+            background: rgba(239, 68, 68, 0.2);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.4);
+            font-size: 11px;
+            font-weight: 800;
+            padding: 2px 8px;
+            border-radius: 6px;
+            letter-spacing: 0.5px;
+        }
+
+        .img-modal-tools {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .modal-btn {
+            background: rgba(51, 65, 85, 0.6);
+            color: #e2e8f0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 6px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .modal-btn:hover {
+            background: rgba(59, 130, 246, 0.2);
+            border-color: rgba(59, 130, 246, 0.5);
+            color: #fff;
+        }
+
+        .modal-btn-close {
+            background: rgba(239, 68, 68, 0.15);
+            color: #ef4444;
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-left: 6px;
+        }
+
+        .modal-btn-close:hover {
+            background: #ef4444;
+            color: #fff;
+        }
+
+        .img-modal-viewport {
+            flex: 1;
+            min-height: 400px;
+            max-height: 68vh;
+            background: #020617;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: auto;
+            position: relative;
+            cursor: grab;
+            user-select: none;
+        }
+
+        .img-modal-viewport:active {
+            cursor: grabbing;
+        }
+
+        #modal-img {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            border-radius: 8px;
+            transition: transform 0.15s ease-out;
+            transform-origin: center center;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.8);
+        }
+
+        .img-modal-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 20px;
+            background: rgba(15, 23, 42, 0.95);
+            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            font-size: 12px;
+            color: #94a3b8;
         }
 
         /* BẢNG NHẬT KÝ */
@@ -388,27 +581,27 @@
         <div class="section">
             <div id="img-section-title" class="section-title" style="color: var(--danger);">⚠ HÌNH ẢNH LỖI GẦN ĐÂY - <span id="img-model-title" style="color: var(--primary);">GÓI THUỐC</span></div>
             <div id="img-grid" class="img-grid">
-                <div class="img-box">
+                <div class="img-box" onclick="openImageModal(this.querySelector('img').src, '1508')">
                     <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260427_150828.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260427_150828.jpg';" alt="Ảnh lỗi">
                     <div class="img-time">1508</div>
                 </div>
-                <div class="img-box">
+                <div class="img-box" onclick="openImageModal(this.querySelector('img').src, '1530')">
                     <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260427_153019.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260427_153019.jpg';" alt="Ảnh lỗi">
                     <div class="img-time">1530</div>
                 </div>
-                <div class="img-box">
+                <div class="img-box" onclick="openImageModal(this.querySelector('img').src, '1535')">
                     <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260427_153532.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260427_153532.jpg';" alt="Ảnh lỗi">
                     <div class="img-time">1535</div>
                 </div>
-                <div class="img-box">
+                <div class="img-box" onclick="openImageModal(this.querySelector('img').src, '1539')">
                     <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260427_153943.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260427_153943.jpg';" alt="Ảnh lỗi">
                     <div class="img-time">1539</div>
                 </div>
-                <div class="img-box">
+                <div class="img-box" onclick="openImageModal(this.querySelector('img').src, '1544')">
                     <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260427_154445.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260427_154445.jpg';" alt="Ảnh lỗi">
                     <div class="img-time">1544</div>
                 </div>
-                <div class="img-box">
+                <div class="img-box" onclick="openImageModal(this.querySelector('img').src, '1545')">
                     <img src="https://raw.githubusercontent.com/nguyentuanthanhfpt159-png/cms/main/NG_LOI/pill_20260427_154502.jpg" onerror="this.onerror=null;this.src='/error_images/pill_20260427_154502.jpg';" alt="Ảnh lỗi">
                     <div class="img-time">1545</div>
                 </div>
@@ -702,13 +895,154 @@
                     : `onerror="this.style.opacity='0.4';"`;
 
                 grid.innerHTML += `
-                    <div class="img-box">
+                    <div class="img-box" onclick="openImageModal('${primaryUrl}', '${timeTag}')">
                         <img src="${primaryUrl}" alt="Ảnh lỗi Supabase" ${onerrorAttr}>
                         <div class="img-time">${timeTag}</div>
                     </div>
                 `;
             });
         }
+
+        // XỬ LÝ MODAL PHÓNG TO & ZOOM ẢNH LỖI
+        let currentZoom = 1.0;
+        let isPanning = false;
+        let panStartX = 0, panStartY = 0;
+        let panScrollLeft = 0, panScrollTop = 0;
+
+        function openImageModal(imgSrc, timeTag) {
+            const modal = document.getElementById('img-modal');
+            const modalImg = document.getElementById('modal-img');
+            const modelNameEl = document.getElementById('modal-model-name');
+            const timeTagEl = document.getElementById('modal-time-tag');
+            const rawLink = document.getElementById('modal-open-raw');
+
+            if (!modal || !modalImg) return;
+
+            modalImg.src = imgSrc;
+            if (rawLink) rawLink.href = imgSrc;
+            if (modelNameEl) {
+                const mName = MODEL_NAMES[activeModelId] || ("Model #" + activeModelId);
+                modelNameEl.innerText = mName.toUpperCase();
+            }
+            if (timeTagEl) {
+                timeTagEl.innerText = timeTag ? `[Thời điểm: ${timeTag}]` : '';
+            }
+
+            resetZoom();
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeImageModal(e) {
+            if (e && e.target && e.target !== document.getElementById('img-modal')) return;
+            const modal = document.getElementById('img-modal');
+            if (modal) {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+        }
+
+        function zoomImage(delta) {
+            currentZoom = Math.max(0.5, Math.min(5.0, currentZoom + delta));
+            applyZoom();
+        }
+
+        function resetZoom() {
+            currentZoom = 1.0;
+            applyZoom();
+            const vp = document.getElementById('modal-viewport');
+            if (vp) {
+                vp.scrollLeft = 0;
+                vp.scrollTop = 0;
+            }
+        }
+
+        function applyZoom() {
+            const modalImg = document.getElementById('modal-img');
+            const zoomTxt = document.getElementById('modal-zoom-level');
+            if (modalImg) {
+                modalImg.style.transform = `scale(${currentZoom})`;
+            }
+            if (zoomTxt) {
+                zoomTxt.innerText = `${Math.round(currentZoom * 100)}%`;
+            }
+        }
+
+        function handleWheelZoom(event) {
+            event.preventDefault();
+            const delta = event.deltaY < 0 ? 0.25 : -0.25;
+            zoomImage(delta);
+        }
+
+        // Bấm phím ESC để đóng modal
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const modal = document.getElementById('img-modal');
+                if (modal) {
+                    modal.classList.remove('active');
+                    document.body.style.overflow = '';
+                }
+            }
+        });
+
+        // Kéo chuột để pan khi zoom và double-click để phóng to/thu nhỏ
+        document.addEventListener('DOMContentLoaded', function() {
+            const vp = document.getElementById('modal-viewport');
+            const modalImg = document.getElementById('modal-img');
+            const grid = document.getElementById('img-grid');
+
+            if (vp) {
+                vp.addEventListener('mousedown', function(e) {
+                    if (currentZoom <= 1.0) return;
+                    isPanning = true;
+                    panStartX = e.pageX - vp.offsetLeft;
+                    panStartY = e.pageY - vp.offsetTop;
+                    panScrollLeft = vp.scrollLeft;
+                    panScrollTop = vp.scrollTop;
+                });
+                vp.addEventListener('mouseleave', function() { isPanning = false; });
+                vp.addEventListener('mouseup', function() { isPanning = false; });
+                vp.addEventListener('mousemove', function(e) {
+                    if (!isPanning) return;
+                    e.preventDefault();
+                    const x = e.pageX - vp.offsetLeft;
+                    const y = e.pageY - vp.offsetTop;
+                    vp.scrollLeft = panScrollLeft - (x - panStartX);
+                    vp.scrollTop = panScrollTop - (y - panStartY);
+                });
+            }
+
+            if (modalImg) {
+                modalImg.addEventListener('dblclick', function(e) {
+                    e.stopPropagation();
+                    if (currentZoom > 1.1) {
+                        resetZoom();
+                    } else {
+                        currentZoom = 2.0;
+                        applyZoom();
+                    }
+                });
+            }
+
+            // Click delegation cho img-grid
+            if (grid) {
+                grid.addEventListener('click', function(e) {
+                    const box = e.target.closest('.img-box');
+                    if (!box) return;
+                    const img = box.querySelector('img');
+                    const timeEl = box.querySelector('.img-time');
+                    if (img) {
+                        openImageModal(img.currentSrc || img.src, timeEl ? timeEl.innerText.trim() : '');
+                    }
+                });
+            }
+        });
+
+        window.openImageModal = openImageModal;
+        window.closeImageModal = closeImageModal;
+        window.zoomImage = zoomImage;
+        window.resetZoom = resetZoom;
+        window.handleWheelZoom = handleWheelZoom;
 
         function updateImages(mId, force = false) {
             const m = mId || activeModelId || 1;
@@ -733,6 +1067,33 @@
         update();
         updateImages();
     </script>
+
+    <!-- MODAL PHÓNG TO & ZOOM ẢNH LỖI CAMERA AI -->
+    <div id="img-modal" class="img-modal" onclick="closeImageModal(event)">
+        <div class="img-modal-content" onclick="event.stopPropagation()">
+            <div class="img-modal-header">
+                <div class="img-modal-title">
+                    <span class="modal-badge-ng">NG ERROR</span>
+                    <span id="modal-model-name">GÓI THUỐC</span>
+                    <span id="modal-time-tag" style="color: #94a3b8; font-size: 13px; font-weight: normal; margin-left: 8px;"></span>
+                </div>
+                <div class="img-modal-tools">
+                    <button class="modal-btn" onclick="zoomImage(0.25)" title="Phóng to (+)">🔍+ Phóng to</button>
+                    <button class="modal-btn" onclick="zoomImage(-0.25)" title="Thu nhỏ (-)">🔍- Thu nhỏ</button>
+                    <button class="modal-btn" onclick="resetZoom()" title="Đặt lại (100%)">100%</button>
+                    <a id="modal-open-raw" href="#" target="_blank" class="modal-btn" title="Mở ảnh gốc trong tab mới">↗ Ảnh gốc</a>
+                    <button class="modal-btn-close" onclick="closeImageModal()" title="Đóng (ESC)">✕</button>
+                </div>
+            </div>
+            <div class="img-modal-viewport" id="modal-viewport" onwheel="handleWheelZoom(event)">
+                <img id="modal-img" src="" alt="Ảnh lỗi chi tiết">
+            </div>
+            <div class="img-modal-footer">
+                <span>💡 <b>Mẹo:</b> Dùng con lăn chuột để Zoom In/Out, hoặc bấm các nút phía trên. Nhấn <b>ESC</b> để đóng.</span>
+                <span id="modal-zoom-level" style="font-weight: 700; color: #3b82f6;">100%</span>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
