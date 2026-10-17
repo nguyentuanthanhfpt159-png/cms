@@ -543,7 +543,7 @@
     <div class="control-panel">
         <button id="btn-model-1" class="btn active" onclick="setMode(1)">📦 Model: Gói thuốc</button>
         <button id="btn-model-2" class="btn" onclick="setMode(2)">💊 Model: Vỉ thuốc</button>
-        <button id="btn-model-3" class="btn" onclick="setMode(3)">🔘 Model: Viên rời</button>
+        <button id="btn-model-3" class="btn" onclick="setMode(3)">🔘 Model: Viên thuốc</button>
     </div>
 
     <div class="stats-grid">
@@ -674,7 +674,7 @@
         const MODEL_NAMES = {
             1: "Gói thuốc",
             2: "Vỉ thuốc",
-            3: "Viên rời"
+            3: "Viên thuốc"
         };
 
         function showToast(msg, isSuccess = true) {
@@ -721,13 +721,14 @@
             }
 
             showToast(`Đang chuyển sang Model: ${mName}...`);
+            update(id);
+            updateImages(id, true);
 
             fetch('/api/set_model/' + id)
                 .then(r => r.json())
                 .then(res => {
                     if (res.status === "success") {
                         showToast(`Đã kích hoạt Model: ${mName} thành công!`);
-                        updateImages(id, true);
                     } else {
                         showToast("Lỗi: " + (res.message || "Không thể đổi model"), false);
                     }
@@ -735,12 +736,12 @@
                 .catch(err => {
                     console.log("Lỗi fetch set_model:", err);
                     showToast(`Đã chọn Model: ${mName}!`, true);
-                    updateImages(id, true);
                 });
         }
 
-        function update() {
-            fetch('/api/stats')
+        function update(forcedModelId) {
+            const m = forcedModelId || activeModelId || 1;
+            fetch('/api/stats?model=' + m)
                 .then(r => r.json())
                 .then(d => {
                     document.getElementById('val-total').innerText = d.total;
@@ -752,15 +753,16 @@
                     statusEl.innerText = d.status;
                     statusEl.style.color = (d.status === "RUNNING") ? "#10b981" : "#ef4444";
 
-                    // Cập nhật biểu đồ (Bao bọc trong try-catch để tránh lỗi nếu không có mạng)
+                    // Cập nhật biểu đồ theo đúng danh mục lỗi của từng Model riêng biệt
                     try {
                         if (lineChart) {
                             if (d.hourly_labels) lineChart.data.labels = d.hourly_labels;
                             lineChart.data.datasets[0].data = d.hourly_data;
                             lineChart.update();
                         }
-                        if (pieChart) {
-                            pieChart.data.datasets[0].data = [d.error_types['Dị vật'], d.error_types['Vỡ'], d.error_types['Thiếu viên']];
+                        if (pieChart && d.error_types) {
+                            pieChart.data.labels = Object.keys(d.error_types);
+                            pieChart.data.datasets[0].data = Object.values(d.error_types);
                             pieChart.update();
                         }
                     } catch (e) {
