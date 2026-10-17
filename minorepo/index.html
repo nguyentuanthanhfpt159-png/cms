@@ -453,6 +453,8 @@
             } catch (e) {
                 console.log("Lỗi khởi tạo biểu đồ:", e);
             }
+        }
+
         const MODEL_NAMES = {
             1: "Gói thuốc",
             2: "Vỉ thuốc",
@@ -475,7 +477,10 @@
             }, 3000);
         }
 
+        let lastUserClickTime = 0;
+
         function setMode(id) {
+            lastUserClickTime = Date.now();
             // Phản hồi giao diện tức thì
             document.querySelectorAll('.control-panel .btn').forEach(btn => btn.classList.remove('active'));
             const activeBtn = document.getElementById(`btn-model-${id}`);
@@ -498,7 +503,7 @@
                 })
                 .catch(err => {
                     console.log("Lỗi fetch set_model:", err);
-                    showToast("Đã gửi lệnh đổi Model!", true);
+                    showToast(`Đã chọn Model: ${mName}!`, true);
                 });
         }
 
@@ -530,16 +535,18 @@
                         console.log("Biểu đồ chưa sẵn sàng hoặc thiếu thư viện Chart.js");
                     }
 
-                    // Cập nhật nút Model đang được chọn & Header
-                    const curModel = d.current_model || 1;
-                    document.querySelectorAll('.control-panel .btn').forEach(btn => btn.classList.remove('active'));
-                    const activeBtn = document.getElementById(`btn-model-${curModel}`);
-                    if (activeBtn) activeBtn.classList.add('active');
+                    // Cập nhật nút Model đang được chọn & Header (chỉ ghi đè nếu người dùng không bấm đổi trong vòng 4s)
+                    if (Date.now() - lastUserClickTime > 4000) {
+                        const curModel = d.current_model || 1;
+                        document.querySelectorAll('.control-panel .btn').forEach(btn => btn.classList.remove('active'));
+                        const activeBtn = document.getElementById(`btn-model-${curModel}`);
+                        if (activeBtn) activeBtn.classList.add('active');
 
-                    const modelTxt = document.getElementById('model-txt');
-                    if (modelTxt) {
-                        const mName = MODEL_NAMES[curModel] || ("Model #" + curModel);
-                        modelTxt.innerText = mName.toUpperCase();
+                        const modelTxt = document.getElementById('model-txt');
+                        if (modelTxt) {
+                            const mName = MODEL_NAMES[curModel] || ("Model #" + curModel);
+                            modelTxt.innerText = mName.toUpperCase();
+                        }
                     }
 
                     // Cập nhật trạng thái PLC (Tức thì)
