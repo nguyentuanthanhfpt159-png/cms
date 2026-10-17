@@ -93,7 +93,7 @@ def stats():
             pass
 
     if total == 0:
-        total, ok, ng = 2839, 2710, 129
+        total, ok, ng = 394, 150, 244
 
     return jsonify({
         "total": total, "ok": ok, "ng": ng,
